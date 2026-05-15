@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fase 1 — Levantamento | PCS SM Madeiras</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a href="dashboard.html" class="topbar-logo">Instituto Primazia</a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-project">PCS · Fase 1 · Levantamento e Diagnóstico</span>
+  <div class="topbar-right">
+    <span class="topbar-user">Olá, <strong id="userName">...</strong></span>
+    <button class="topbar-btn" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-label">Navegação</div>
+    <div class="sidebar-section">
+      <a href="dashboard.html" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+    </div>
+    <div class="sidebar-label">Fases do PCS</div>
+    <div class="sidebar-section">
+      <a href="fase1.html" class="sidebar-link active"><span class="sidebar-phase-num">01</span> Levantamento</a>
+      <a href="fase2.html" class="sidebar-link"><span class="sidebar-phase-num">02</span> Descrição</a>
+      <a href="fase3.html" class="sidebar-link"><span class="sidebar-phase-num">03</span> Avaliação</a>
+      <a href="fase4.html" class="sidebar-link"><span class="sidebar-phase-num">04</span> Estrutura Salarial</a>
+      <a href="fase5.html" class="sidebar-link"><span class="sidebar-phase-num">05</span> Implantação</a>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <a href="marcos.html" class="sidebar-link"><span class="icon">🏁</span> Marcos Críticos</a>
+      <a href="usuarios.html" class="sidebar-link" id="sideUsuarios" style="display:none"><span class="icon">👥</span> Usuários</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+      <div>
+        <div class="page-eyebrow">Fase 01 · Maio · Semanas 1 e 2</div>
+        <div class="page-title">Levantamento e Diagnóstico</div>
+        <div class="page-sub">Coleta de cargos · Inconsistências salariais · Alinhamento inicial com Vilson e Michele</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:32px;font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--gold)" id="fasePct">0%</div>
+        <div style="font-size:11px;color:var(--gray-300)" id="faseTasks">0 de 3 atividades</div>
+        <div class="progress-track" style="width:120px;margin-top:6px;margin-left:auto"><div class="progress-fill" id="faseBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- ATIVIDADES -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">
+        <span class="card-title">Atividades da Fase</span>
+        <span style="font-size:11px;color:var(--gray-300)">Marque as atividades conforme avançarem</span>
+      </div>
+      <table class="table" id="atvsTable">
+        <thead>
+          <tr><th></th><th>Atividade</th><th>Responsável</th><th>Entregável</th><th>Status</th><th>Atualizado por</th></tr>
+        </thead>
+        <tbody id="atvsBody">
+          <tr><td colspan="6"><div class="empty"><div class="empty-text">Carregando...</div></div></td></tr>
+        </tbody>
+      </table>
+      <div style="padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-dark)">
+        <span style="font-size:12px;color:var(--amber);font-weight:500">⚠️ Ponto de atenção: o alinhamento com Vilson e Michele na largada evita retrabalho nas fases seguintes. Eles definem os critérios que a Primazia vai operar.</span>
+      </div>
+    </div>
+
+    <!-- CARGOS LEVANTADOS -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header">
+        <span class="card-title">Cargos Levantados</span>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalCargo()">+ Adicionar Cargo</button>
+      </div>
+      <table class="table">
+        <thead>
+          <tr><th>Cargo</th><th>Departamento</th><th>Tipo</th><th>Qtd Ocupantes</th><th>Situação</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="cargosBody">
+          <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum cargo cadastrado ainda. Clique em "+ Adicionar Cargo"</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- NOTAS DA FASE -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">📝 Notas e Encaminhamentos da Fase 1</span></div>
+      <div class="card-body">
+        <textarea class="form-textarea" id="notasFase" style="min-height:120px" placeholder="Registre aqui decisões, encaminhamentos, datas de reunião, responsáveis e qualquer informação relevante desta fase..."></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:10px;align-items:center">
+          <span style="font-size:11px;color:var(--gray-300)" id="notasSalvas"></span>
+          <button class="btn btn-primary btn-sm" onclick="salvarNotas()">Salvar Notas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CARGO -->
+<div class="modal-overlay" id="modalCargo">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Cadastrar Cargo</span>
+      <button class="modal-close" onclick="fecharModalCargo()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome do Cargo</label>
+        <input type="text" class="form-input" id="cNome" placeholder="Ex: Operador de Máquinas" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <select class="form-select" id="cDepto">
+            <option>Operacional / Florestal</option>
+            <option>Técnico / Manutenção</option>
+            <option>Administrativo</option>
+            <option>Comercial / Logística</option>
+            <option>Gestão / Liderança</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" id="cTipo">
+            <option value="formal">Formal (registrado)</option>
+            <option value="informal">Informal (função real)</option>
+            <option value="ambos">Ambos</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Qtd de Ocupantes</label>
+          <input type="number" class="form-input" id="cQtd" placeholder="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Situação</label>
+          <select class="form-select" id="cSituacao">
+            <option value="ativo">Ativo</option>
+            <option value="extinto">A extinguir</option>
+            <option value="novo">Cargo novo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="cObs" placeholder="Discrepâncias, inconsistências, observações importantes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="fecharModalCargo()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="salvarCargo()">Salvar Cargo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const FASE_ID = 'fase01';
+const ATIVIDADES_DEF = [
+  { id:'atv1', nome:'Coleta de todos os cargos existentes (formais e informais)', resp:'Primazia + RH SM', respClass:'primazia', entregavel:'Lista consolidada de cargos' },
+  { id:'atv2', nome:'Levantamento de inconsistências salariais internas', resp:'RH SM (Michele)', respClass:'', entregavel:'Relatório de inconsistências' },
+  { id:'atv3', nome:'Alinhamento inicial com Vilson e Michele sobre escopo e critérios', resp:'Primazia + Vilson + Michele', respClass:'primazia', entregavel:'Diretrizes validadas para início' }
+];
+
+let currentUser, currentPerfil;
+
+requireAuth((user, perfil) => {
+  currentUser = user; currentPerfil = perfil;
+  document.getElementById('userName').textContent = perfil.nome || user.email;
+  if(isAdmin(perfil)) document.getElementById('sideUsuarios').style.display='flex';
+  carregarAtividades();
+  carregarCargos();
+  carregarNotas();
+});
+
+// ── ATIVIDADES ──────────────────────────────────────────────
+function carregarAtividades() {
+  const ref = db.collection('fases').doc(FASE_ID).collection('atividades');
+  ref.onSnapshot(snap => {
+    const data = {};
+    snap.forEach(d => data[d.id] = d.data());
+    let done = 0;
+    const tbody = document.getElementById('atvsBody');
+    tbody.innerHTML = ATIVIDADES_DEF.map(a => {
+      const saved = data[a.id] || {};
+      const status = saved.status || 'pendente';
+      if(status === 'concluido') done++;
+      const donRow = status === 'concluido' ? 'opacity:0.6' : '';
+      const sCls = 'status-sel s-'+status;
+      const updBy = saved.atualizadoPor ? `<span style="font-size:11px;color:var(--gray-300)">${saved.atualizadoPor}</span>` : '—';
+      return `<tr style="${donRow}">
+        <td><input type="checkbox" class="task-check" ${status==='concluido'?'checked':''} onchange="toggleCheck('${a.id}', this.checked)"></td>
+        <td style="font-size:13px">${a.nome}</td>
+        <td><span class="resp ${a.respClass}">${a.resp}</span></td>
+        <td><span style="font-size:12px;color:var(--gray-500);font-style:italic">${a.entregavel}</span></td>
+        <td>
+          <select class="${sCls}" onchange="updateStatus('${a.id}', this)">
+            <option value="pendente" ${status==='pendente'?'selected':''}>Pendente</option>
+            <option value="andamento" ${status==='andamento'?'selected':''}>Em andamento</option>
+            <option value="concluido" ${status==='concluido'?'selected':''}>Concluído</option>
+          </select>
+        </td>
+        <td>${updBy}</td>
+      </tr>`;
+    }).join('');
+    const pct = Math.round((done/ATIVIDADES_DEF.length)*100);
+    document.getElementById('fasePct').textContent = pct+'%';
+    document.getElementById('faseTasks').textContent = done+' de '+ATIVIDADES_DEF.length+' atividades';
+    document.getElementById('faseBar').style.width = pct+'%';
+  });
+}
+
+function toggleCheck(id, checked) {
+  updateStatusDB(id, checked ? 'concluido' : 'pendente');
+}
+
+function updateStatus(id, sel) {
+  sel.className = 'status-sel s-'+sel.value;
+  updateStatusDB(id, sel.value);
+}
+
+function updateStatusDB(id, status) {
+  const nomeUsuario = currentPerfil.nome || currentUser.email;
+  db.collection('fases').doc(FASE_ID).collection('atividades').doc(id).set({
+    status, atualizadoPor: nomeUsuario,
+    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  }, {merge:true}).then(() => {
+    registrarLog(`Status da atividade atualizado para "${status}"`, '✅');
+    showToast('Atualizado!', 'ok');
+  });
+}
+
+// ── CARGOS ──────────────────────────────────────────────────
+function carregarCargos() {
+  db.collection('fases').doc(FASE_ID).collection('cargos').orderBy('nome').onSnapshot(snap => {
+    const tbody = document.getElementById('cargosBody');
+    if(snap.empty) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum cargo cadastrado ainda.</div></div></td></tr>';
+      return;
+    }
+    const tipos = { formal:'Formal', informal:'Informal', ambos:'Formal + Informal' };
+    const sits = { ativo:'<span class="badge badge-green">Ativo</span>', extinto:'<span class="badge badge-gray">A extinguir</span>', novo:'<span class="badge badge-amber">Cargo novo</span>' };
+    tbody.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return `<tr>
+        <td><strong>${c.nome||'—'}</strong>${c.obs?`<div style="font-size:11px;color:var(--gray-300);margin-top:2px">${c.obs}</div>`:''}</td>
+        <td style="font-size:12px">${c.depto||'—'}</td>
+        <td><span class="badge badge-gray">${tipos[c.tipo]||c.tipo}</span></td>
+        <td style="text-align:center;font-size:13px">${c.qtd||0}</td>
+        <td>${sits[c.situacao]||c.situacao}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="removerCargo('${d.id}','${c.nome}')">Remover</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  });
+}
+
+function abrirModalCargo() { document.getElementById('modalCargo').classList.add('show'); }
+function fecharModalCargo() { document.getElementById('modalCargo').classList.remove('show'); }
+
+function salvarCargo() {
+  const nome = document.getElementById('cNome').value.trim();
+  if(!nome) { showToast('Informe o nome do cargo.', 'erro'); return; }
+  db.collection('fases').doc(FASE_ID).collection('cargos').add({
+    nome,
+    depto: document.getElementById('cDepto').value,
+    tipo: document.getElementById('cTipo').value,
+    qtd: parseInt(document.getElementById('cQtd').value)||0,
+    situacao: document.getElementById('cSituacao').value,
+    obs: document.getElementById('cObs').value.trim(),
+    criadoPor: currentPerfil.nome || currentUser.email,
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    fecharModalCargo();
+    ['cNome','cQtd','cObs'].forEach(id => document.getElementById(id).value='');
+    showToast('Cargo cadastrado com sucesso!', 'ok');
+    registrarLog(`Cargo "${nome}" cadastrado na Fase 1`, '📋');
+  });
+}
+
+function removerCargo(id, nome) {
+  if(!confirm(`Remover o cargo "${nome}"?`)) return;
+  db.collection('fases').doc(FASE_ID).collection('cargos').doc(id).delete()
+    .then(() => showToast('Cargo removido.', 'ok'));
+}
+
+// ── NOTAS ───────────────────────────────────────────────────
+function carregarNotas() {
+  db.collection('fases').doc(FASE_ID).get().then(d => {
+    if(d.exists && d.data().notas) document.getElementById('notasFase').value = d.data().notas;
+  });
+}
+
+function salvarNotas() {
+  const notas = document.getElementById('notasFase').value;
+  db.collection('fases').doc(FASE_ID).set({ notas, notasAtualizadoPor: currentPerfil.nome, notasAtualizadoEm: firebase.firestore.FieldValue.serverTimestamp() }, {merge:true})
+    .then(() => { document.getElementById('notasSalvas').textContent = '✓ Salvo às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); showToast('Notas salvas!','ok'); });
+}
+
+function registrarLog(texto, icon='📝') {
+  db.collection('atividades_log').add({
+    texto, icon,
+    usuario: currentPerfil.nome || currentUser.email,
+    tsStr: new Date().toLocaleDateString('pt-BR'),
+    ts: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
+}
+
+document.getElementById('modalCargo').addEventListener('click', function(e){ if(e.target===this) fecharModalCargo(); });
+</script>
+</body>
+</html>
