@@ -4,7 +4,7 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB0Pb6TaMuCe4-xNZFUvNgWv1T0KgvXj6I",
+  apiKey: "AIzaSyBOPb6TaMuCe4-xNZFUvNgWv1T0KgvXj6I",
   authDomain: "pccs-sm-madeiras.firebaseapp.com",
   projectId: "pccs-sm-madeiras",
   storageBucket: "pccs-sm-madeiras.firebasestorage.app",
