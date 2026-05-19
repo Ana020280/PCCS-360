@@ -333,16 +333,15 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
       <div class="sb-sec">Principal</div>
       <div class="sbi on" onclick="ir('pg-dash')" data-p="pg-dash"><span class="ic">▣</span>Dashboard Geral</div>
       <div class="sbi" onclick="ir('pg-analitico')" data-p="pg-analitico"><span class="ic">◈</span>Dashboard Analítico</div>
-      <div class="sbi" onclick="ir('pg-emps')" data-p="pg-emps"><span class="ic">◉</span>Empresas</div>
-      <div class="sb-sec">Operacional</div>
-      <div class="sbi" onclick="ir('pg-cargos')" data-p="pg-cargos"><span class="ic">◧</span>Cargos</div>
-      <div class="sbi" onclick="ir('pg-trilhas')" data-p="pg-trilhas"><span class="ic">◈</span>Trilhas de Carreira</div>
-      <div class="sbi" onclick="ir('pg-salarios')" data-p="pg-salarios"><span class="ic">◉</span>Tabelas Salariais</div>
-      <div class="sbi" onclick="ir('pg-diag')" data-p="pg-diag"><span class="ic">◎</span>Diagnóstico</div>
+      <div class="sbi" onclick="ir('pg-emps')" data-p="pg-emps"><span class="ic">◉</span>Empresas / Projetos</div>
+      <div class="sb-sec">Módulos</div>
+      <div class="sbi" onclick="ir('pg-banco-cargos')" data-p="pg-banco-cargos"><span class="ic">◧</span>Banco de Cargos</div>
+      <div class="sbi" onclick="ir('pg-pesq-salarial')" data-p="pg-pesq-salarial"><span class="ic">◈</span>Pesquisa Salarial</div>
+      <div class="sbi" onclick="ir('pg-estrutura')" data-p="pg-estrutura"><span class="ic">◉</span>Estrutura Salarial</div>
+      <div class="sbi" onclick="ir('pg-governanca')" data-p="pg-governanca"><span class="ic">◆</span>Governança e Comitê</div>
       <div class="sb-sec">Gestão</div>
-      <div class="sbi" onclick="ir('pg-impl')" data-p="pg-impl"><span class="ic">▷</span>Implantação</div>
-      <div class="sbi" onclick="ir('pg-gov')" data-p="pg-gov"><span class="ic">◆</span>Governança</div>
       <div class="sbi" onclick="ir('pg-rel')" data-p="pg-rel"><span class="ic">▤</span>Relatórios</div>
+      <div class="sbi" onclick="ir('pg-config')" data-p="pg-config"><span class="ic">◎</span>Configurações</div>
       <div class="sb-sec" id="sb-adm-s" style="display:none">Administração</div>
       <div class="sbi" onclick="ir('pg-users')" data-p="pg-users" id="sb-users" style="display:none"><span class="ic">◉</span>Usuários</div>
     </nav>
@@ -501,14 +500,168 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
       <div style="background:var(--navy);border:1px solid var(--border);border-radius:14px;overflow:auto;"><table class="utbl"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Ações</th></tr></thead><tbody id="utbody"></tbody></table></div>
     </div>
 
-    <!-- PÁGINAS EM BREVE -->
-    <div class="pg" id="pg-cargos"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Cargos</div><p>Em desenvolvimento — em breve disponível</p></div></div>
-    <div class="pg" id="pg-trilhas"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Trilhas de Carreira</div><p>Em desenvolvimento</p></div></div>
-    <div class="pg" id="pg-salarios"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Tabelas Salariais</div><p>Em desenvolvimento</p></div></div>
-    <div class="pg" id="pg-diag"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Diagnóstico</div><p>Em desenvolvimento</p></div></div>
-    <div class="pg" id="pg-impl"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Implantação</div><p>Em desenvolvimento</p></div></div>
-    <div class="pg" id="pg-gov"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Governança</div><p>Em desenvolvimento</p></div></div>
-    <div class="pg" id="pg-rel"><div style="text-align:center;padding:4rem;color:var(--text2)"><div style="font-size:2.5rem;color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">Relatórios</div><p>Em desenvolvimento</p></div></div>
+    <!-- BANCO DE CARGOS -->
+    <div class="pg" id="pg-banco-cargos">
+      <div class="sh">
+        <div class="st">Banco de <span>Cargos</span></div>
+        <div style="display:flex;gap:0.6rem">
+          <button class="btn bg bsm" onclick="abrirModalCargo()">+ Novo Cargo</button>
+          <button class="btn bo bsm" onclick="exportarBancoCargos()">Exportar CSV</button>
+        </div>
+      </div>
+      <div class="filter-bar" style="margin-bottom:1rem">
+        <input type="text" id="fc-busca" placeholder="Buscar cargo..." oninput="renderBancoCargos()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none;min-width:200px">
+        <select id="fc-dept" onchange="renderBancoCargos()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none">
+          <option value="">Todos os departamentos</option>
+        </select>
+        <select id="fc-nivel" onchange="renderBancoCargos()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none">
+          <option value="">Todos os níveis</option>
+          <option>Aprendiz</option><option>Auxiliar</option><option>Assistente</option>
+          <option>Analista</option><option>Especialista</option><option>Supervisor</option>
+          <option>Coordenador</option><option>Gerente</option><option>Diretor</option>
+        </select>
+      </div>
+      <div class="cg" id="cg-banco" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:1rem"></div>
+      <div style="background:var(--navy);border:1px solid var(--border);border-radius:14px;overflow:auto">
+        <table style="width:100%;border-collapse:collapse" id="tbl-cargos">
+          <thead><tr>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Cargo</th>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Departamento</th>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Nível</th>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Empresa</th>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Faixa Salarial</th>
+            <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Status</th>
+            <th style="padding:0.6rem 0.9rem;border-bottom:1px solid var(--border)"></th>
+          </tr></thead>
+          <tbody id="tbody-cargos"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PESQUISA SALARIAL -->
+    <div class="pg" id="pg-pesq-salarial">
+      <div class="sh"><div class="st">Pesquisa <span>Salarial</span></div>
+        <button class="btn bg bsm" onclick="abrirModalPesqSalarial()">+ Nova Pesquisa</button>
+      </div>
+      <div class="cg" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:1.5rem">
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24" stroke="#c9a84c" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="cn" id="ps-total">0</div><div class="cl">Cargos Pesquisados</div></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24" stroke="#c9a84c" fill="none" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div class="cn" id="ps-acima">0</div><div class="cl">Acima do Mercado</div></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24" stroke="#c9a84c" fill="none" stroke-width="1.8"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg></div><div class="cn" id="ps-abaixo">0</div><div class="cl">Abaixo do Mercado</div></div>
+        <div class="card"><div class="ci"><svg viewBox="0 0 24 24" stroke="#c9a84c" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="cn" id="ps-impacto">R$ 0</div><div class="cl">Impacto Financeiro</div></div>
+      </div>
+      <div id="lista-pesq-salarial"><p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhuma pesquisa salarial cadastrada ainda.<br>Clique em <strong style="color:var(--gold)">+ Nova Pesquisa</strong> para iniciar.</p></div>
+    </div>
+
+    <!-- ESTRUTURA SALARIAL -->
+    <div class="pg" id="pg-estrutura">
+      <div class="sh"><div class="st">Estrutura <span>Salarial</span></div>
+        <button class="btn bg bsm" onclick="abrirModalFaixaSalarial()">+ Nova Faixa</button>
+      </div>
+      <div class="cg" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr));margin-bottom:1.5rem">
+        <div class="card"><div class="cn" id="es-familias">0</div><div class="cl">Famílias de Cargos</div></div>
+        <div class="card"><div class="cn" id="es-niveis">0</div><div class="cl">Níveis Criados</div></div>
+        <div class="card"><div class="cn" id="es-faixas">0</div><div class="cl">Faixas Salariais</div></div>
+        <div class="card"><div class="cn" id="es-trilhas">0</div><div class="cl">Trilhas de Carreira</div></div>
+      </div>
+      <div id="lista-estrutura"><p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhuma estrutura salarial definida ainda.<br>Clique em <strong style="color:var(--gold)">+ Nova Faixa</strong> para iniciar.</p></div>
+    </div>
+
+    <!-- GOVERNANÇA E COMITÊ -->
+    <div class="pg" id="pg-governanca">
+      <div class="sh"><div class="st">Governança e <span>Comitê</span></div>
+        <button class="btn bg bsm" onclick="abrirModalComite()">+ Membro do Comitê</button>
+      </div>
+      <div class="cg" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr));margin-bottom:1.5rem">
+        <div class="card"><div class="cn" id="gov-membros">0</div><div class="cl">Membros do Comitê</div></div>
+        <div class="card"><div class="cn" id="gov-atas">0</div><div class="cl">Atas Registradas</div></div>
+        <div class="card"><div class="cn" id="gov-aprovacoes">0</div><div class="cl">Aprovações</div></div>
+        <div class="card"><div class="cn" id="gov-regras">0</div><div class="cl">Regras de Progressão</div></div>
+      </div>
+      <div class="sh" style="margin-top:0.5rem"><div class="st" style="font-size:0.95rem">Membros do <span>Comitê</span></div></div>
+      <div id="lista-comite"><p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhum membro cadastrado ainda.<br>Clique em <strong style="color:var(--gold)">+ Membro do Comitê</strong> para iniciar.</p></div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div class="pg" id="pg-rel">
+      <div class="sh"><div class="st"><span>Relatórios</span></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+        <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,0.3)" onclick="toast('Selecione uma empresa primeiro')">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.4rem">Relatório Completo PCCS</div>
+          <p style="font-size:0.8rem;color:var(--text2)">Documento completo com todas as fases, atividades e resultados da empresa</p>
+          <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">PDF</span>
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">Word</span>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,0.3)" onclick="toast('Acesse uma empresa e vá em Relatório do Projeto')">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.4rem">Relatório por Fase</div>
+          <p style="font-size:0.8rem;color:var(--text2)">Relatório detalhado de uma fase específica com atividades, responsáveis e status</p>
+          <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">CSV</span>
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">PDF</span>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,0.3)" onclick="exportarBancoCargos()">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.4rem">Banco de Cargos</div>
+          <p style="font-size:0.8rem;color:var(--text2)">Exportar todos os cargos cadastrados com descrições e faixas salariais</p>
+          <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">CSV</span>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,0.3)" onclick="exportarColaboradores()">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.4rem">Colaboradores</div>
+          <p style="font-size:0.8rem;color:var(--text2)">Exportar base de colaboradores com cargos, salários e inconsistências</p>
+          <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">CSV</span>
+          </div>
+        </div>
+        <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,0.3)" onclick="exportarAnalitico()">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.4rem">Dashboard Analítico</div>
+          <p style="font-size:0.8rem;color:var(--text2)">Exportar relatório analítico com indicadores de todas as empresas</p>
+          <div style="margin-top:0.8rem;display:flex;gap:0.5rem">
+            <span style="font-size:0.72rem;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.2rem 0.6rem;border-radius:99px">CSV</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="pg" id="pg-config">
+      <div class="sh"><div class="st"><span>Configurações</span></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem">
+        <div class="gen-box">
+          <h3>Instituto Primazia</h3>
+          <div class="fg"><label>Nome da Consultoria</label><input class="inp" id="cfg-nome" value="Instituto Primazia" placeholder="Nome da empresa"></div>
+          <div class="fg"><label>CNPJ</label><input class="inp" id="cfg-cnpj" placeholder="00.000.000/0000-00"></div>
+          <div class="fg"><label>Responsável Geral</label><input class="inp" id="cfg-resp" placeholder="Nome do responsável"></div>
+          <button class="btn bg bsm" onclick="salvarConfig()">Salvar</button>
+        </div>
+        <div class="gen-box">
+          <h3>Aparência do Sistema</h3>
+          <p style="color:var(--text2);font-size:0.83rem;margin-bottom:1rem">Personalização visual — em desenvolvimento</p>
+          <div class="fg"><label>Logo do Sistema</label>
+            <div class="file-drop" onclick="document.getElementById('logo-inp').click()" style="padding:0.7rem">
+              <input type="file" id="logo-inp" accept=".png,.jpg,.svg" style="display:none">
+              <span style="font-size:0.8rem">Clique para trocar a logo</span>
+            </div>
+          </div>
+        </div>
+        <div class="gen-box">
+          <h3>Usuários e Acessos</h3>
+          <p style="color:var(--text2);font-size:0.83rem;margin-bottom:1rem">Gerencie quem pode acessar o sistema</p>
+          <button class="btn bg bsm" onclick="ir('pg-users')">Gerenciar Usuários</button>
+        </div>
+        <div class="gen-box">
+          <h3>Dados do Sistema</h3>
+          <p style="color:var(--text2);font-size:0.83rem;margin-bottom:1rem">Backup e restauração de dados</p>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+            <button class="btn bo bsm" onclick="backupDados()">Fazer Backup</button>
+            <button class="btn bo bsm" onclick="document.getElementById('restore-inp').click()">Restaurar Backup</button>
+            <input type="file" id="restore-inp" accept=".json" style="display:none" onchange="restaurarDados(this)">
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -558,25 +711,190 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
   </div>
 </div>
 
+<!-- MODAL BANCO DE CARGOS -->
+<div class="mo" id="mo-cargo">
+  <div class="mb wide">
+    <h2>Cadastrar Cargo</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <div class="fg"><label>Nome do Cargo *</label><input class="inp" id="cg-nome" placeholder="Ex: Analista de RH"></div>
+      <div class="fg"><label>CBO (se houver)</label><input class="inp" id="cg-cbo" placeholder="Ex: 2521-05"></div>
+      <div class="fg"><label>Departamento / Área</label><input class="inp" id="cg-dept" placeholder="Ex: Recursos Humanos"></div>
+      <div class="fg"><label>Nível Hierárquico</label>
+        <select class="sel" id="cg-nivel">
+          <option value="">Selecione...</option>
+          <option>Aprendiz</option><option>Estagiário</option><option>Auxiliar</option>
+          <option>Assistente</option><option>Analista</option><option>Especialista</option>
+          <option>Supervisor</option><option>Coordenador</option><option>Gerente</option><option>Diretor</option>
+        </select>
+      </div>
+      <div class="fg"><label>Família de Cargos</label><input class="inp" id="cg-familia" placeholder="Ex: Família Operacional"></div>
+      <div class="fg"><label>Empresa Vinculada</label>
+        <select class="sel" id="cg-empresa"><option value="">Banco Geral</option></select>
+      </div>
+      <div class="fg"><label>Faixa Salarial (mín)</label><input class="inp" type="number" id="cg-sal-min" placeholder="0,00"></div>
+      <div class="fg"><label>Faixa Salarial (máx)</label><input class="inp" type="number" id="cg-sal-max" placeholder="0,00"></div>
+      <div class="fg"><label>Escolaridade Mínima</label><input class="inp" id="cg-escol" placeholder="Ex: Ensino Superior"></div>
+      <div class="fg"><label>Experiência Mínima</label><input class="inp" id="cg-exp" placeholder="Ex: 2 anos na área"></div>
+    </div>
+    <div class="fg"><label>Missão do Cargo</label><textarea class="ta" id="cg-missao" placeholder="Descreva o objetivo principal do cargo..." style="min-height:60px"></textarea></div>
+    <div class="fg"><label>Principais Responsabilidades</label><textarea class="ta" id="cg-resp2" placeholder="Liste as principais atividades e responsabilidades..." style="min-height:80px"></textarea></div>
+    <div class="fg"><label>Competências Técnicas</label><textarea class="ta" id="cg-comp-tec" placeholder="Conhecimentos e habilidades técnicas necessárias..." style="min-height:60px"></textarea></div>
+    <div class="fg"><label>Competências Comportamentais</label><textarea class="ta" id="cg-comp-comp" placeholder="Habilidades comportamentais necessárias..." style="min-height:60px"></textarea></div>
+    <div class="fg"><label>Status do Cargo</label>
+      <select class="sel" id="cg-status"><option value="ativo">Ativo</option><option value="em_descricao">Em Descrição</option><option value="revisao">Em Revisão</option><option value="aprovado">Aprovado</option></select>
+    </div>
+    <div class="mb-btns"><button class="btn bo" onclick="fechar('mo-cargo')">Cancelar</button><button class="btn bg" onclick="salvarCargo()">Salvar Cargo</button></div>
+  </div>
+</div>
+
+<!-- MODAL PESQUISA SALARIAL -->
+<div class="mo" id="mo-pesq-sal">
+  <div class="mb">
+    <h2>Nova Pesquisa Salarial</h2>
+    <div class="fg"><label>Cargo *</label><input class="inp" id="ps-cargo" placeholder="Nome do cargo pesquisado"></div>
+    <div class="fg"><label>Empresa</label><select class="sel" id="ps-empresa"><option value="">Geral</option></select></div>
+    <div class="fg"><label>Fonte da Pesquisa</label><input class="inp" id="ps-fonte" placeholder="Ex: CAGED, RAIS, Guia Salarial Robert Half..."></div>
+    <div class="row2">
+      <div class="fg"><label>Salário Atual (empresa)</label><input class="inp" type="number" id="ps-atual" placeholder="0,00"></div>
+      <div class="fg"><label>Mediana de Mercado</label><input class="inp" type="number" id="ps-mediana" placeholder="0,00"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Mínimo de Mercado</label><input class="inp" type="number" id="ps-min" placeholder="0,00"></div>
+      <div class="fg"><label>Máximo de Mercado</label><input class="inp" type="number" id="ps-max" placeholder="0,00"></div>
+    </div>
+    <div class="fg"><label>Observações</label><textarea class="ta" id="ps-obs" placeholder="Contexto, fontes adicionais, notas..." style="min-height:60px"></textarea></div>
+    <div class="mb-btns"><button class="btn bo" onclick="fechar('mo-pesq-sal')">Cancelar</button><button class="btn bg" onclick="salvarPesqSalarial()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL COMITÊ -->
+<div class="mo" id="mo-comite">
+  <div class="mb">
+    <h2>Membro do Comitê</h2>
+    <div class="fg"><label>Nome Completo *</label><input class="inp" id="cm-nome" placeholder="Nome do membro"></div>
+    <div class="row2">
+      <div class="fg"><label>Cargo / Função</label><input class="inp" id="cm-cargo" placeholder="Ex: Diretor de RH"></div>
+      <div class="fg"><label>Papel no Comitê</label>
+        <select class="sel" id="cm-papel">
+          <option>Presidente</option><option>Membro Titular</option><option>Membro Suplente</option>
+          <option>Observador</option><option>Secretário</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>E-mail</label><input class="inp" type="email" id="cm-email" placeholder="email@empresa.com"></div>
+      <div class="fg"><label>Empresa</label><select class="sel" id="cm-empresa"><option value="">Instituto Primazia</option></select></div>
+    </div>
+    <div class="mb-btns"><button class="btn bo" onclick="fechar('mo-comite')">Cancelar</button><button class="btn bg" onclick="salvarComite()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL FAIXA SALARIAL -->
+<div class="mo" id="mo-faixa">
+  <div class="mb">
+    <h2>Nova Faixa Salarial</h2>
+    <div class="fg"><label>Família de Cargos *</label><input class="inp" id="fx-familia" placeholder="Ex: Família Operacional"></div>
+    <div class="fg"><label>Nível *</label><input class="inp" id="fx-nivel" placeholder="Ex: Auxiliar I, Analista Pleno"></div>
+    <div class="row2">
+      <div class="fg"><label>Salário Mínimo</label><input class="inp" type="number" id="fx-min" placeholder="0,00"></div>
+      <div class="fg"><label>Salário Médio (mid)</label><input class="inp" type="number" id="fx-mid" placeholder="0,00"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Salário Máximo</label><input class="inp" type="number" id="fx-max" placeholder="0,00"></div>
+      <div class="fg"><label>Empresa</label><select class="sel" id="fx-empresa"><option value="">Geral</option></select></div>
+    </div>
+    <div class="mb-btns"><button class="btn bo" onclick="fechar('mo-faixa')">Cancelar</button><button class="btn bg" onclick="salvarFaixa()">Salvar</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script src="firebase-config.js"></script>
 <script>
 // ══ FASES DETALHADAS ══
 const FASES=[
-  {id:'f1',nome:'Levantamento e Diagnóstico',desc:'Coleta de dados e análise da situação atual da empresa',atividades:[
-    'Reunião de kickoff com liderança','Coleta de dados de colaboradores (nome, cargo, salário, tempo de empresa)','Análise do organograma atual','Identificação de inconsistências salariais','Mapeamento de desvios de função','Levantamento da política salarial atual','Diagnóstico de clima organizacional','Análise de rotatividade e absenteísmo','Identificação de cargos duplicados ou sobrepostos','Relatório de diagnóstico organizacional'
+  {id:'f1',nome:'Levantamento e Diagnóstico Organizacional',desc:'Coleta, análise e mapeamento da situação atual da empresa',atividades:[
+    'Reunião de kickoff com liderança e definição de responsáveis',
+    'Coleta da relação completa de colaboradores (cargos, salários, admissão)',
+    'Análise do organograma atual e estrutura departamental',
+    'Identificação de inconsistências salariais e desvios de função',
+    'Mapeamento da política salarial atual (formal e informal)',
+    'Diagnóstico de cargos duplicados, sem descrição ou sobrepostos',
+    'Análise de rotatividade, absenteísmo e dados de pessoal',
+    'Levantamento de vínculos, jornadas e benefícios praticados',
+    'Validação dos dados com gestores e área de RH',
+    'Relatório de diagnóstico organizacional finalizado'
   ]},
-  {id:'f2',nome:'Descrição de Cargos',desc:'Mapeamento e elaboração das descrições funcionais de todos os cargos',atividades:[
-    'Listagem de todos os cargos existentes','Entrevistas com ocupantes dos cargos','Elaboração do formulário de descrição de cargos','Preenchimento das descrições por cargo','Definição de requisitos e competências por cargo','Validação das descrições com gestores','Revisão e ajustes conforme feedback','Organização por famílias de cargos','Aprovação das descrições pela diretoria','Manual de cargos finalizado'
+  {id:'f2',nome:'Mapeamento e Descrição de Cargos',desc:'Identificação, organização e descrição funcional de todos os cargos',atividades:[
+    'Listagem e consolidação de todos os cargos existentes',
+    'Entrevistas e coleta de informações com ocupantes dos cargos',
+    'Elaboração das descrições por cargo (missão, atribuições, requisitos)',
+    'Definição de competências técnicas e comportamentais por cargo',
+    'Organização por famílias e grupos de cargos',
+    'Validação das descrições com gestores de cada área',
+    'Revisão e ajustes conforme feedback das lideranças',
+    'Aprovação das descrições pela diretoria',
+    'Banco de cargos atualizado no sistema',
+    'Manual de cargos finalizado e documentado'
   ]},
-  {id:'f3',nome:'Avaliação de Cargos',desc:'Pontuação, hierarquização e classificação dos cargos por complexidade',atividades:[
-    'Definição do método de avaliação (pontos por fator)','Capacitação do comitê de avaliação','Aplicação da avaliação para cada cargo','Tabulação dos resultados','Análise e validação dos pontos atribuídos','Criação da hierarquia de cargos (níveis)','Agrupamento em grades e famílias','Validação com diretoria','Tabela de pontuação finalizada','Relatório de avaliação de cargos'
+  {id:'f3',nome:'Avaliação, Classificação e Hierarquização de Cargos',desc:'Pontuação, classificação e criação da hierarquia de cargos',atividades:[
+    'Definição do método de avaliação de cargos (pontos por fator)',
+    'Capacitação do comitê interno de avaliação',
+    'Aplicação da avaliação para cada cargo',
+    'Tabulação e análise dos resultados',
+    'Criação da hierarquia de cargos por nível e grau',
+    'Agrupamento em grades, famílias e trilhas de carreira',
+    'Definição da matriz de senioridade (Júnior, Pleno, Sênior, Líder)',
+    'Validação da hierarquia com a diretoria',
+    'Tabela de pontuação e classificação finalizada',
+    'Relatório de avaliação e hierarquização de cargos'
   ]},
-  {id:'f4',nome:'Estrutura Salarial',desc:'Definição das faixas, tabelas e política de remuneração',atividades:[
-    'Pesquisa salarial de mercado (setor e região)','Análise de competitividade salarial','Definição da amplitude das faixas salariais','Criação das tabelas salariais por nível','Política de crescimento por mérito','Política de promoção e enquadramento','Análise de impacto financeiro na folha','Adequação dos salários às faixas','Aprovação da estrutura pela diretoria','Tabelas salariais aprovadas e documentadas'
+  {id:'f4',nome:'Pesquisa Salarial e Viabilidade Financeira',desc:'Pesquisa de mercado, análise de competitividade e impacto financeiro',atividades:[
+    'Definição das fontes de pesquisa salarial (CAGED, RAIS, consultorias)',
+    'Coleta de dados salariais de mercado por cargo e região',
+    'Análise de competitividade: salário atual vs. mercado',
+    'Cálculo de médias, medianas, mínimos e máximos por cargo',
+    'Identificação de defasagem salarial por cargo e nível',
+    'Simulação de enquadramento nas faixas propostas',
+    'Cálculo do impacto financeiro mensal e anual',
+    'Criação de cenários: implantação imediata, gradual ou futura',
+    'Validação dos cenários com a diretoria e financeiro',
+    'Relatório de viabilidade financeira para diretoria'
   ]},
-  {id:'f5',nome:'Implantação e Sustentação',desc:'Implementação, comunicação e monitoramento do PCCS',atividades:[
-    'Apresentação final do PCCS para diretoria','Ajustes finais conforme aprovação','Elaboração do plano de comunicação','Comunicação do PCCS aos colaboradores','Treinamento de gestores e RH','Implementação dos novos enquadramentos salariais','Criação do cronograma de revisão anual','Monitoramento dos primeiros 90 dias','Avaliação de satisfação pós-implantação','Relatório final de implantação entregue'
+  {id:'f5',nome:'Estrutura Salarial e Trilhas de Carreira',desc:'Criação das faixas salariais, políticas e trilhas de desenvolvimento',atividades:[
+    'Criação das famílias de cargos e níveis hierárquicos',
+    'Definição e criação das faixas salariais por nível',
+    'Criação dos steps (degraus) de progressão salarial',
+    'Definição de critérios por nível: Aprendiz, Auxiliar, Assistente, Analista, Especialista, Líder',
+    'Vinculação de competências técnicas e comportamentais por nível',
+    'Definição dos requisitos mínimos de progressão',
+    'Criação de trilhas horizontais, verticais e carreira em Y',
+    'Definição da política de crescimento por mérito e promoção',
+    'Aprovação da estrutura salarial pela diretoria',
+    'Tabelas salariais e trilhas de carreira documentadas'
+  ]},
+  {id:'f6',nome:'Governança, Comitê e Regras de Progressão',desc:'Estruturação do comitê, regras de elegibilidade e fluxos de aprovação',atividades:[
+    'Composição e cadastro dos membros do comitê de progressão',
+    'Definição do papel e responsabilidade de cada membro',
+    'Criação das regras de elegibilidade para promoção e mérito',
+    'Definição dos critérios formais: tempo mínimo, avaliação mínima, treinamentos',
+    'Criação do fluxo de aprovação de progressões',
+    'Registro das primeiras atas e decisões do comitê',
+    'Definição da periodicidade das reuniões de comitê',
+    'Definição da política de enquadramento inicial',
+    'Aprovação do regulamento de governança pela diretoria',
+    'Manual de governança e progressão finalizado'
+  ]},
+  {id:'f7',nome:'Implantação, Comunicação e Sustentação',desc:'Implementação, comunicação interna, treinamentos e monitoramento',atividades:[
+    'Apresentação final do PCCS para diretoria e aprovação',
+    'Elaboração do plano de comunicação interno',
+    'Comunicação oficial do PCCS aos colaboradores',
+    'Treinamento das lideranças e equipe de RH',
+    'Implementação dos enquadramentos salariais aprovados',
+    'Acompanhamento e suporte nos primeiros 30 dias',
+    'Monitoramento e avaliação nos primeiros 90 dias',
+    'Criação do cronograma de revisão e atualização anual',
+    'Avaliação de satisfação pós-implantação',
+    'Relatório final de implantação entregue ao cliente'
   ]}
 ];
 
@@ -1325,6 +1643,175 @@ function exportarRelProjeto(){
   const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='Relatorio_'+empA.nome.replace(/\s+/g,'_')+'.csv';link.click();
   toast('✅ Relatório exportado!');
 }
+
+// ══ BANCO DE CARGOS ══
+const CK='pccs360_cargos', PSK='pccs360_pesqsal', CMK='pccs360_comite', FXK='pccs360_faixas';
+function getCargos(){try{return JSON.parse(localStorage.getItem(CK)||'[]');}catch{return[];}}
+function setCargos(d){localStorage.setItem(CK,JSON.stringify(d));}
+function getPesqSal(){try{return JSON.parse(localStorage.getItem(PSK)||'[]');}catch{return[];}}
+function setPesqSal(d){localStorage.setItem(PSK,JSON.stringify(d));}
+function getComite(){try{return JSON.parse(localStorage.getItem(CMK)||'[]');}catch{return[];}}
+function setComite(d){localStorage.setItem(CMK,JSON.stringify(d));}
+function getFaixas(){try{return JSON.parse(localStorage.getItem(FXK)||'[]');}catch{return[];}}
+function setFaixas(d){localStorage.setItem(FXK,JSON.stringify(d));}
+
+function abrirModalCargo(){
+  ['cg-nome','cg-cbo','cg-dept','cg-familia','cg-sal-min','cg-sal-max','cg-escol','cg-exp','cg-missao','cg-resp2','cg-comp-tec','cg-comp-comp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('cg-nivel').value='';document.getElementById('cg-status').value='ativo';
+  // Populate empresa select
+  const sel=document.getElementById('cg-empresa');sel.innerHTML='<option value="">Banco Geral</option>';
+  emps.forEach(e=>sel.innerHTML+=`<option value="${e.id}">${e.nome}</option>`);
+  abrir('mo-cargo');
+}
+
+function salvarCargo(){
+  const nome=document.getElementById('cg-nome').value.trim();if(!nome){toast('Informe o nome do cargo');return;}
+  const cargo={id:'c_'+Date.now(),nome,cbo:document.getElementById('cg-cbo').value.trim(),departamento:document.getElementById('cg-dept').value.trim(),nivel:document.getElementById('cg-nivel').value,familia:document.getElementById('cg-familia').value.trim(),empresa:document.getElementById('cg-empresa').value,salMin:document.getElementById('cg-sal-min').value,salMax:document.getElementById('cg-sal-max').value,escolaridade:document.getElementById('cg-escol').value.trim(),experiencia:document.getElementById('cg-exp').value.trim(),missao:document.getElementById('cg-missao').value.trim(),responsabilidades:document.getElementById('cg-resp2').value.trim(),compTec:document.getElementById('cg-comp-tec').value.trim(),compComp:document.getElementById('cg-comp-comp').value.trim(),status:document.getElementById('cg-status').value,criadoEm:new Date().toISOString()};
+  const lista=getCargos();lista.push(cargo);setCargos(lista);
+  fechar('mo-cargo');renderBancoCargos();toast('Cargo cadastrado!');
+}
+
+function renderBancoCargos(){
+  const cargos=getCargos();
+  const busca=(document.getElementById('fc-busca')&&document.getElementById('fc-busca').value||'').toLowerCase();
+  const dept=(document.getElementById('fc-dept')&&document.getElementById('fc-dept').value||'');
+  const nivel=(document.getElementById('fc-nivel')&&document.getElementById('fc-nivel').value||'');
+  const filtrados=cargos.filter(c=>{
+    const okB=!busca||c.nome.toLowerCase().includes(busca)||(c.departamento&&c.departamento.toLowerCase().includes(busca));
+    const okD=!dept||c.departamento===dept;const okN=!nivel||c.nivel===nivel;
+    return okB&&okD&&okN;
+  });
+  // Update dept filter
+  const sel=document.getElementById('fc-dept');if(sel){const depts=[...new Set(cargos.map(c=>c.departamento).filter(Boolean))];const v=sel.value;sel.innerHTML='<option value="">Todos os departamentos</option>';depts.forEach(d=>sel.innerHTML+=`<option value="${d}" ${d===v?'selected':''}>${d}</option>`);}
+  // Cards resumo
+  const cg=document.getElementById('cg-banco');if(cg){cg.innerHTML=`<div class="card"><div class="cn">${cargos.length}</div><div class="cl">Total Cargos</div></div><div class="card"><div class="cn">${[...new Set(cargos.map(c=>c.departamento).filter(Boolean))].length}</div><div class="cl">Departamentos</div></div><div class="card"><div class="cn">${cargos.filter(c=>c.status==='aprovado').length}</div><div class="cl">Aprovados</div></div><div class="card"><div class="cn">${cargos.filter(c=>c.status==='em_descricao').length}</div><div class="cl">Em Descrição</div></div>`;}
+  // Tabela
+  const tb=document.getElementById('tbody-cargos');if(!tb)return;
+  if(!filtrados.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">Nenhum cargo encontrado</td></tr>';return;}
+  const stCls={ativo:'sa',em_descricao:'sp',revisao:'st-a',aprovado:'sc'};
+  const stLbl={ativo:'Ativo',em_descricao:'Em Descrição',revisao:'Em Revisão',aprovado:'Aprovado'};
+  tb.innerHTML=filtrados.map(c=>{
+    const emp=emps.find(e=>e.id===c.empresa);
+    const salFaixa=c.salMin&&c.salMax?`R$ ${Number(c.salMin).toLocaleString('pt-BR')} – R$ ${Number(c.salMax).toLocaleString('pt-BR')}`:'—';
+    return`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)"><td style="padding:0.65rem 0.9rem"><strong>${c.nome}</strong>${c.cbo?`<br><span style="font-size:0.7rem;color:var(--text2)">CBO: ${c.cbo}</span>`:''}</td><td style="padding:0.65rem 0.9rem;color:var(--text2)">${c.departamento||'—'}</td><td style="padding:0.65rem 0.9rem"><span class="fst ${stCls[c.nivel]||'sp'}" style="font-size:0.68rem">${c.nivel||'—'}</span></td><td style="padding:0.65rem 0.9rem;color:var(--text2);font-size:0.8rem">${emp?emp.nome:'Banco Geral'}</td><td style="padding:0.65rem 0.9rem;font-size:0.8rem">${salFaixa}</td><td style="padding:0.65rem 0.9rem"><span class="fst ${stCls[c.status]||'sp'}">${stLbl[c.status]||c.status}</span></td><td style="padding:0.65rem 0.9rem"><button class="btn bd bsm" onclick="delCargo('${c.id}')">✕</button></td></tr>`;
+  }).join('');
+}
+function delCargo(id){if(!confirm('Excluir cargo?'))return;setCargos(getCargos().filter(c=>c.id!==id));renderBancoCargos();toast('Cargo excluído');}
+function exportarBancoCargos(){
+  const cargos=getCargos();
+  const rows=[['Nome do Cargo','CBO','Departamento','Nível','Família','Empresa','Sal. Mín','Sal. Máx','Escolaridade','Experiência','Status'],...cargos.map(c=>[c.nome,c.cbo,c.departamento,c.nivel,c.familia,(emps.find(e=>e.id===c.empresa)||{nome:'Banco Geral'}).nome,c.salMin,c.salMax,c.escolaridade,c.experiencia,c.status])];
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='Banco_Cargos_PCCS360.csv';link.click();toast('Banco de Cargos exportado!');
+}
+
+// ══ PESQUISA SALARIAL ══
+function abrirModalPesqSalarial(){
+  ['ps-cargo','ps-fonte','ps-atual','ps-mediana','ps-min','ps-max','ps-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=document.getElementById('ps-empresa');if(sel){sel.innerHTML='<option value="">Geral</option>';emps.forEach(e=>sel.innerHTML+=`<option value="${e.id}">${e.nome}</option>`);}
+  abrir('mo-pesq-sal');
+}
+function salvarPesqSalarial(){
+  const cargo=document.getElementById('ps-cargo').value.trim();if(!cargo){toast('Informe o cargo');return;}
+  const atual=Number(document.getElementById('ps-atual').value)||0;
+  const mediana=Number(document.getElementById('ps-mediana').value)||0;
+  const ps={id:'ps_'+Date.now(),cargo,empresa:document.getElementById('ps-empresa').value,fonte:document.getElementById('ps-fonte').value.trim(),atual,mediana,min:Number(document.getElementById('ps-min').value)||0,max:Number(document.getElementById('ps-max').value)||0,obs:document.getElementById('ps-obs').value.trim(),defasagem:mediana?((atual-mediana)/mediana*100).toFixed(1):0,criadoEm:new Date().toISOString()};
+  const lista=getPesqSal();lista.push(ps);setPesqSal(lista);fechar('mo-pesq-sal');renderPesqSalarial();toast('Pesquisa salva!');
+}
+function renderPesqSalarial(){
+  const lista=getPesqSal();
+  const div=document.getElementById('lista-pesq-salarial');if(!div)return;
+  const psTotal=document.getElementById('ps-total');if(psTotal)psTotal.textContent=lista.length;
+  const acima=lista.filter(p=>Number(p.atual)>Number(p.mediana)).length;
+  const abaixo=lista.filter(p=>Number(p.atual)<Number(p.mediana)).length;
+  const impacto=lista.reduce((a,p)=>{const d=Number(p.mediana)-Number(p.atual);return a+(d>0?d:0);},0);
+  const psAcima=document.getElementById('ps-acima');if(psAcima)psAcima.textContent=acima;
+  const psAbaixo=document.getElementById('ps-abaixo');if(psAbaixo)psAbaixo.textContent=abaixo;
+  const psImpacto=document.getElementById('ps-impacto');if(psImpacto)psImpacto.textContent='R$ '+impacto.toLocaleString('pt-BR',{minimumFractionDigits:0});
+  if(!lista.length){div.innerHTML='<p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhuma pesquisa salarial cadastrada ainda.</p>';return;}
+  div.innerHTML=`<div style="background:var(--navy);border:1px solid var(--border);border-radius:14px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Cargo</th><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Empresa</th><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Sal. Atual</th><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Mercado (med)</th><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Defasagem</th><th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Fonte</th></tr></thead><tbody>${lista.map(p=>{const emp=emps.find(e=>e.id===p.empresa);const def=Number(p.defasagem);const defCls=def<-5?'color:var(--danger)':def>5?'color:var(--green)':'color:var(--text2)';return`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)"><td style="padding:0.65rem 0.9rem"><strong>${p.cargo}</strong></td><td style="padding:0.65rem 0.9rem;color:var(--text2)">${emp?emp.nome:'Geral'}</td><td style="padding:0.65rem 0.9rem">R$ ${Number(p.atual).toLocaleString('pt-BR')}</td><td style="padding:0.65rem 0.9rem">R$ ${Number(p.mediana).toLocaleString('pt-BR')}</td><td style="padding:0.65rem 0.9rem;${defCls};font-weight:700">${def>0?'+':''}${def}%</td><td style="padding:0.65rem 0.9rem;color:var(--text2);font-size:0.78rem">${p.fonte||'—'}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+
+// ══ COMITÊ ══
+function abrirModalComite(){
+  ['cm-nome','cm-cargo','cm-email'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=document.getElementById('cm-empresa');if(sel){sel.innerHTML='<option value="">Instituto Primazia</option>';emps.forEach(e=>sel.innerHTML+=`<option value="${e.id}">${e.nome}</option>`);}
+  abrir('mo-comite');
+}
+function salvarComite(){
+  const nome=document.getElementById('cm-nome').value.trim();if(!nome){toast('Informe o nome');return;}
+  const m={id:'cm_'+Date.now(),nome,cargo:document.getElementById('cm-cargo').value.trim(),papel:document.getElementById('cm-papel').value,email:document.getElementById('cm-email').value.trim(),empresa:document.getElementById('cm-empresa').value,criadoEm:new Date().toISOString()};
+  const lista=getComite();lista.push(m);setComite(lista);fechar('mo-comite');renderComite();toast('Membro cadastrado!');
+}
+function renderComite(){
+  const lista=getComite();
+  const divM=document.getElementById('gov-membros');if(divM)divM.textContent=lista.length;
+  const div=document.getElementById('lista-comite');if(!div)return;
+  if(!lista.length){div.innerHTML='<p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhum membro do comitê cadastrado.</p>';return;}
+  div.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.8rem">${lista.map(m=>{const emp=emps.find(e=>e.id===m.empresa);return`<div class="gen-box" style="margin:0"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--text)">${m.nome}</div><div style="font-size:0.78rem;color:var(--text2)">${m.cargo||'—'}</div><div style="font-size:0.72rem;color:var(--gold);margin-top:0.3rem">${m.papel}</div>${m.email?`<div style="font-size:0.72rem;color:var(--text2);margin-top:0.2rem">${m.email}</div>`:''}<div style="font-size:0.72rem;color:var(--text2)">${emp?emp.nome:'Instituto Primazia'}</div></div><button class="btn bd bsm" onclick="delComite('${m.id}')">✕</button></div></div>`;}).join('')}</div>`;
+}
+function delComite(id){if(!confirm('Remover membro?'))return;setComite(getComite().filter(m=>m.id!==id));renderComite();toast('Membro removido');}
+
+// ══ FAIXAS SALARIAIS ══
+function abrirModalFaixaSalarial(){
+  ['fx-familia','fx-nivel','fx-min','fx-mid','fx-max'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=document.getElementById('fx-empresa');if(sel){sel.innerHTML='<option value="">Geral</option>';emps.forEach(e=>sel.innerHTML+=`<option value="${e.id}">${e.nome}</option>`);}
+  abrir('mo-faixa');
+}
+function salvarFaixa(){
+  const familia=document.getElementById('fx-familia').value.trim(),nivel=document.getElementById('fx-nivel').value.trim();
+  if(!familia||!nivel){toast('Informe família e nível');return;}
+  const f={id:'fx_'+Date.now(),familia,nivel,min:Number(document.getElementById('fx-min').value)||0,mid:Number(document.getElementById('fx-mid').value)||0,max:Number(document.getElementById('fx-max').value)||0,empresa:document.getElementById('fx-empresa').value,criadoEm:new Date().toISOString()};
+  const lista=getFaixas();lista.push(f);setFaixas(lista);fechar('mo-faixa');renderEstrutura();toast('Faixa criada!');
+}
+function renderEstrutura(){
+  const lista=getFaixas();
+  const familias=[...new Set(lista.map(f=>f.familia))];
+  const ef=document.getElementById('es-familias');if(ef)ef.textContent=familias.length;
+  const en=document.getElementById('es-niveis');if(en)en.textContent=lista.length;
+  const div=document.getElementById('lista-estrutura');if(!div)return;
+  if(!lista.length){div.innerHTML='<p style="color:var(--text2);font-size:0.85rem;text-align:center;padding:3rem">Nenhuma faixa salarial definida ainda.</p>';return;}
+  div.innerHTML=familias.map(fam=>{const faixas=lista.filter(f=>f.familia===fam);return`<div style="background:var(--navy);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem"><div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);margin-bottom:0.8rem">${fam}</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="padding:0.5rem 0.8rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Nível</th><th style="padding:0.5rem 0.8rem;text-align:right;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Mínimo</th><th style="padding:0.5rem 0.8rem;text-align:right;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Médio</th><th style="padding:0.5rem 0.8rem;text-align:right;font-size:0.68rem;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border)">Máximo</th><th style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border)"></th></tr></thead><tbody>${faixas.map(f=>`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)"><td style="padding:0.55rem 0.8rem">${f.nivel}</td><td style="padding:0.55rem 0.8rem;text-align:right;color:var(--green)">R$ ${f.min.toLocaleString('pt-BR')}</td><td style="padding:0.55rem 0.8rem;text-align:right;color:var(--gold)">R$ ${f.mid.toLocaleString('pt-BR')}</td><td style="padding:0.55rem 0.8rem;text-align:right;color:var(--danger)">R$ ${f.max.toLocaleString('pt-BR')}</td><td style="padding:0.55rem 0.8rem"><button class="btn bd bsm" onclick="delFaixa('${f.id}')">✕</button></td></tr>`).join('')}</tbody></table></div></div>`;}).join('');
+}
+function delFaixa(id){if(!confirm('Excluir faixa?'))return;setFaixas(getFaixas().filter(f=>f.id!==id));renderEstrutura();toast('Faixa excluída');}
+
+// ══ CONFIGURAÇÕES ══
+function salvarConfig(){toast('Configurações salvas!');}
+function backupDados(){
+  const dados={emps:getE(),users:getU(),cargos:getCargos(),pesqSal:getPesqSal(),comite:getComite(),faixas:getFaixas(),backup:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(dados,null,2)],{type:'application/json'});
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='PCCS360_Backup_'+new Date().toISOString().slice(0,10)+'.json';link.click();toast('Backup realizado!');
+}
+function restaurarDados(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.emps)setE(d.emps);if(d.users)setU(d.users);if(d.cargos)setCargos(d.cargos);if(d.pesqSal)setPesqSal(d.pesqSal);if(d.comite)setComite(d.comite);if(d.faixas)setFaixas(d.faixas);carregarEmps();toast('Backup restaurado!');input.value='';}catch(e){toast('Arquivo de backup inválido.');}};
+  reader.readAsText(input.files[0]);
+}
+
+function exportarColaboradores(){toast('Acesse uma empresa, abra a Fase 1 e use "Exportar fase"');}
+function exportarAnalitico(){renderAnalitico();setTimeout(()=>exportarRelProjeto&&exportarExcel(),500);}
+
+// Update ir() to render new pages
+const _ir2=ir;
+window.ir=function(id){
+  _ir2(id);
+  if(id==='pg-banco-cargos')setTimeout(renderBancoCargos,50);
+  if(id==='pg-pesq-salarial')setTimeout(renderPesqSalarial,50);
+  if(id==='pg-governanca')setTimeout(renderComite,50);
+  if(id==='pg-estrutura')setTimeout(renderEstrutura,50);
+};
+
+// Update ir title map
+const _irTitles2={'pg-banco-cargos':'Banco de <span>Cargos</span>','pg-pesq-salarial':'Pesquisa <span>Salarial</span>','pg-estrutura':'Estrutura <span>Salarial</span>','pg-governanca':'Governança e <span>Comitê</span>','pg-rel':'<span>Relatórios</span>','pg-config':'<span>Configurações</span>'};
+const _origIr=window.ir;
+window.ir=function(id){
+  _origIr(id);
+  if(_irTitles2[id]){const el=document.getElementById('tb-t');if(el)el.innerHTML=_irTitles2[id];}
+};
+
+// Update modals close listener
+['mo-cargo','mo-pesq-sal','mo-comite','mo-faixa'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',function(e){if(e.target===this)fechar(id);});});
 
 // Auto login
 const s=getSess();if(s){iniciar(s);}
