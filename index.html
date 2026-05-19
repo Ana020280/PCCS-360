@@ -280,6 +280,14 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
   .row2{grid-template-columns:1fr;}
 }
 
+/* ATIVIDADE EXTENDIDA */
+.ai-ext{background:var(--navy2);border-radius:var(--r);margin-bottom:0.4rem;overflow:hidden;border:1px solid transparent;transition:border-color 0.2s;}
+.ai-ext:hover{border-color:rgba(201,168,76,0.2);}
+
+/* RELATORIO INTERNO */
+.rel-card{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:0.8rem;}
+.rel-card h4{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:var(--gold);margin-bottom:0.5rem;}
+
 /* PRINT STYLES */
 @media print{
   .sb,.tb,.back,.btn,.fac,.sb-ua{display:none!important;}
@@ -417,6 +425,7 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
         <div class="tab" onclick="showTab('tab-obs',this)">Observações</div>
         <div class="tab" onclick="showTab('tab-anx',this)">Anexos</div>
         <div class="tab" onclick="showTab('tab-gen',this)">Gerar Documento PCCS</div>
+        <div class="tab" onclick="showTab('tab-rel-proj',this)">Relatório do Projeto</div>
       </div>
       <div class="tab-c on" id="tab-fases"><div class="fl2" id="fl2"></div></div>
       <div class="tab-c" id="tab-obs">
@@ -435,6 +444,37 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
           <div style="font-size:0.72rem;margin-top:0.3rem;color:var(--text2)">PDF, Word, Excel, Imagens</div>
         </div>
       </div>
+      <div class="tab-c" id="tab-rel-proj">
+        <div style="display:flex;gap:0.7rem;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center">
+          <select id="rp-fase" onchange="renderRelProjeto()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none">
+            <option value="">Todas as fases</option>
+          </select>
+          <select id="rp-status" onchange="renderRelProjeto()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none">
+            <option value="">Todos os status</option>
+            <option value="0">Pendentes</option>
+            <option value="1">Concluídas</option>
+          </select>
+          <select id="rp-resp" onchange="renderRelProjeto()" style="padding:0.5rem 0.8rem;background:var(--navy);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.8rem;outline:none">
+            <option value="">Todos os responsáveis</option>
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn bg bsm" onclick="exportarRelProjeto()">↓ Exportar CSV</button>
+        </div>
+        <div id="rel-proj-cards"></div>
+        <div style="background:var(--navy);border:1px solid var(--border);border-radius:14px;overflow:auto;margin-top:1rem">
+          <table style="width:100%;border-collapse:collapse" id="rel-proj-tbl">
+            <thead><tr>
+              <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Fase</th>
+              <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Atividade</th>
+              <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Responsável</th>
+              <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Status</th>
+              <th style="padding:0.6rem 0.9rem;text-align:left;font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid var(--border)">Observações</th>
+            </tr></thead>
+            <tbody id="tbody-rel-proj"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="tab-c" id="tab-gen">
         <div class="gen-box">
           <h3>Gerar Documento Final PCCS</h3>
@@ -615,6 +655,7 @@ function showTab(id,el){
   el.classList.add('on');
   if(id==='tab-anx'&&empA)renderAnexos();
   if(id==='tab-obs'&&empA)document.getElementById('obs-txt').value=getObs(empA.id);
+  if(id==='tab-rel-proj'&&empA)initRelProjeto();
 }
 
 // ══ EMPRESAS ══
@@ -660,13 +701,13 @@ function renderDash(){
   if(!emps.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">Nenhuma empresa cadastrada</td></tr>';return;}
   emps.forEach(e=>{
     const p=calcP(e),fi=getFiAtual(e),et=getEt(e);
-    const fd=e.fases&&e.fases[FASES[fi]?.id];const st=fd?.status||'pendente';
+    const fd=e.fases&&FASES[fi]&&e.fases[FASES[fi].id];const st=(fd&&fd.status)||'pendente';
     const stl={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[st];
     const stc={pendente:'sp',andamento:'sa',concluida:'sc'}[st];
     const df=e.dataFim?new Date(e.dataFim).toLocaleDateString('pt-BR'):'—';
     const atrasado=e.dataFim&&new Date(e.dataFim)<new Date()&&p<100;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${e.nome}</strong></td><td style="color:var(--text2)">${e.setor||'—'}</td><td>${e.lider||'—'}</td><td style="font-size:0.78rem;color:var(--text2)">${FASES[fi]?.nome.split(' ').slice(0,2).join(' ')||'—'}</td><td style="color:${atrasado?'var(--danger)':'var(--text2)'}">${df}</td><td><div style="height:4px;background:var(--navy2);border-radius:99px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-right:0.4rem"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px"></div></div><strong style="color:var(--gold)">${p}%</strong></td><td><span class="fst ${stc}">${stl}</span></td><td><button class="btn bo bsm" onclick="abrirDet('${e.id}')">Ver →</button></td>`;
+    tr.innerHTML=`<td><strong>${e.nome}</strong></td><td style="color:var(--text2)">${e.setor||'—'}</td><td>${e.lider||'—'}</td><td style="font-size:0.78rem;color:var(--text2)">${FASES[fi]?(FASES[fi].nome.split(' ').slice(0,2).join(' ')):'—'}</td><td style="color:${atrasado?'var(--danger)':'var(--text2)'}">${df}</td><td><div style="height:4px;background:var(--navy2);border-radius:99px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-right:0.4rem"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px"></div></div><strong style="color:var(--gold)">${p}%</strong></td><td><span class="fst ${stc}">${stl}</span></td><td><button class="btn bo bsm" onclick="abrirDet('${e.id}')">Ver →</button></td>`;
     tb.appendChild(tr);
   });
 }
@@ -682,9 +723,9 @@ function renderFiltros(){
 }
 
 function renderAnalitico(){
-  const fEmp=document.getElementById('f-emp')?.value||'';
-  const fFase=document.getElementById('f-fase')?.value||'';
-  const fSt=document.getElementById('f-status')?.value||'';
+  const fEmp=(document.getElementById('f-emp')||{}).value||'';
+  const fFase=(document.getElementById('f-fase')||{}).value||'';
+  const fSt=(document.getElementById('f-status')||{}).value||'';
   let lista=fEmp?emps.filter(e=>e.id===fEmp):emps;
 
   // Cards analíticos
@@ -701,11 +742,11 @@ function renderAnalitico(){
     <div class="card"><div class="ci"><svg viewBox="0 0 24 24" stroke="#c9a84c" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="cn" style="color:var(--danger)">${atrasadas}</div><div class="cl">Com Prazo Vencido</div></div>`;
 
   // Gráfico progresso
-  const ctx1=document.getElementById('ch-prog')?.getContext('2d');
+  const ctx1=document.getElementById('ch-prog')&&document.getElementById('ch-prog').getContext('2d');
   if(ctx1){if(chPr)chPr.destroy();chPr=new Chart(ctx1,{type:'bar',data:{labels:lista.map(e=>e.nome.length>15?e.nome.slice(0,15)+'…':e.nome),datasets:[{label:'%',data:lista.map(e=>calcP(e)),backgroundColor:lista.map(e=>calcP(e)===100?'#4caf7d':'rgba(201,168,76,0.7)'),borderRadius:6}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100,ticks:{color:'#8a9bb5',font:{size:9}}},y:{ticks:{color:'#8a9bb5',font:{size:9}}},}}});}
 
   // Gráfico concluídas vs pendentes
-  const ctx2=document.getElementById('ch-atv')?.getContext('2d');
+  const ctx2=document.getElementById('ch-atv')&&document.getElementById('ch-atv').getContext('2d');
   if(ctx2){if(chAt)chAt.destroy();chAt=new Chart(ctx2,{type:'doughnut',data:{labels:['Concluídas','Pendentes'],datasets:[{data:[concAtv,totAtv-concAtv],backgroundColor:['#4caf7d','rgba(201,168,76,0.3)'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{labels:{color:'#8a9bb5',font:{size:11}},position:'bottom'}}}});}
 
   // Tabela detalhada
@@ -739,7 +780,7 @@ function renderEmps(){
     const di=e.dataInicio?new Date(e.dataInicio).toLocaleDateString('pt-BR'):'—';
     const df=e.dataFim?new Date(e.dataFim).toLocaleDateString('pt-BR'):'—';
     const atrasado=e.dataFim&&new Date(e.dataFim)<new Date()&&p<100;
-    c.innerHTML=`<div class="et"><div class="eic"><svg viewBox="0 0 24 24" stroke="${p===100?'#4caf7d':p>0?'#c9a84c':'#8a9bb5'}" fill="none" stroke-width="1.8" width="20" height="20"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div><div style="flex:1"><div class="en">${e.nome}</div><div class="es">${e.setor||'Sem setor'} ${e.cidade?'· '+e.cidade:''}</div></div><span class="eb2 ${RCORES[et]}">${RLABELS[et]}</span></div>${e.lider?`<div style="font-size:0.72rem;color:var(--text2);margin-bottom:0.3rem"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Líder: <strong style="color:var(--text)">${e.lider}</strong></div>`:''}<div style="font-size:0.7rem;color:var(--text2);margin-bottom:0.6rem">Início: <strong style="color:var(--text)">${di}</strong> &nbsp;|&nbsp; Prazo: <strong style="color:${atrasado?'var(--danger)':'var(--text)'}">${df}</strong></div><div class="pb"><div class="pf" style="width:${p}%"></div></div><div class="pi"><span>Fase: <strong>${FASES[fi]?.nome.split(' ').slice(0,2).join(' ')}</strong></span><strong>${p}%</strong></div><div class="fm">${dots}</div>`;
+    c.innerHTML=`<div class="et"><div class="eic"><svg viewBox="0 0 24 24" stroke="${p===100?'#4caf7d':p>0?'#c9a84c':'#8a9bb5'}" fill="none" stroke-width="1.8" width="20" height="20"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div><div style="flex:1"><div class="en">${e.nome}</div><div class="es">${e.setor||'Sem setor'} ${e.cidade?'· '+e.cidade:''}</div></div><span class="eb2 ${RCORES[et]}">${RLABELS[et]}</span></div>${e.lider?`<div style="font-size:0.72rem;color:var(--text2);margin-bottom:0.3rem"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Líder: <strong style="color:var(--text)">${e.lider}</strong></div>`:''}<div style="font-size:0.7rem;color:var(--text2);margin-bottom:0.6rem">Início: <strong style="color:var(--text)">${di}</strong> &nbsp;|&nbsp; Prazo: <strong style="color:${atrasado?'var(--danger)':'var(--text)'}">${df}</strong></div><div class="pb"><div class="pf" style="width:${p}%"></div></div><div class="pi"><span>Fase: <strong>${FASES[fi]?(FASES[fi].nome.split(' ').slice(0,2).join(' ')):''}</strong></span><strong>${p}%</strong></div><div class="fm">${dots}</div>`;
     g.appendChild(c);
   });
 }
@@ -781,28 +822,184 @@ function renderDet(){
   renderFases2();
 }
 
+function getRespAtv(fid,idx){const r=empA.fases&&empA.fases[fid]&&empA.fases[fid].resp||{};return r[idx]||'';}
+function getNotaAtv(fid,idx){const n=empA.fases&&empA.fases[fid]&&empA.fases[fid].notas||{};return n[idx]||'';}
+
 function renderFases2(){
   const e=empA,l=document.getElementById('fl2');l.innerHTML='';
   FASES.forEach((f,idx)=>{
-    const fd=e.fases&&e.fases[f.id]||{status:'pendente',atividades:{}};
+    const fd=e.fases&&e.fases[f.id]||{status:'pendente',atividades:{},resp:{},notas:{}};
     const st=fd.status||'pendente',isO=faA===f.id;
-    const c=document.createElement('div');c.className=`fc2 ${st==='concluida'?'conc':st==='andamento'?'atv':''}`;
+    const fc=document.createElement('div');fc.className='fc2 '+(st==='concluida'?'conc':st==='andamento'?'atv':'');
     const stl={pendente:'Pendente',andamento:'Em andamento',concluida:'Concluída'}[st];
     const stc={pendente:'sp',andamento:'sa',concluida:'sc'}[st];
     const conc=Object.values(fd.atividades||{}).filter(Boolean).length;
-    const avs=f.atividades.map((atv,i)=>{
-      const done=fd.atividades&&fd.atividades[i];
-      const blk=!pEdit()?'style="opacity:0.4;pointer-events:none"':'';
-      return`<div class="ai ${done?'done':''}" onclick="${pEdit()?`toggleAtv('${f.id}',${i})`:''}'" ${blk}><div class="ack"></div><span>${atv}</span></div>`;
-    }).join('');
-    const acoes=pEdit()?`
-      ${st!=='andamento'?`<button class="btn bo bsm" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar</button>`:''}
-      ${st!=='concluida'?`<button class="btn bg bsm" onclick="mudarSt('${f.id}','concluida')">✓ Concluir</button>`:''}
-      ${st==='concluida'?`<button class="btn bo bsm" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`:''}
-    `:`<span style="color:var(--text2);font-size:0.75rem">👁️ Somente visualização</span>`;
-    c.innerHTML=`<div class="fh" onclick="toggleFase('${f.id}')"><div class="fn">${idx+1}</div><div class="fi2"><h3>${f.nome}</h3><p>${f.desc} · ${conc}/${f.atividades.length} atividades</p></div><div class="fst ${stc}">${stl}</div></div><div class="fb ${isO?'open':''}" id="fb-${f.id}"><div class="fdiv"></div><div class="al">${avs}</div><div class="fac">${acoes}</div></div>`;
-    l.appendChild(c);
+    const pct=Math.round((conc/f.atividades.length)*100);
+
+    // Cabeçalho
+    const fhDiv=document.createElement('div');fhDiv.className='fh';
+    fhDiv.innerHTML=`<div class="fn">${idx+1}</div><div class="fi2"><h3>${f.nome}</h3><p>${f.desc} · <strong style="color:var(--gold)">${conc}/${f.atividades.length}</strong> atividades · <strong style="color:var(--gold)">${pct}%</strong></p></div><div class="fst ${stc}">${stl}</div>`;
+    fhDiv.addEventListener('click',()=>toggleFase(f.id));
+    fc.appendChild(fhDiv);
+
+    // Corpo
+    const fbDiv=document.createElement('div');fbDiv.className='fb'+(isO?' open':'');fbDiv.id='fb-'+f.id;
+
+    // Barra de progresso da fase
+    fbDiv.innerHTML=`<div class="fdiv"></div><div style="margin-bottom:1rem"><div style="height:5px;background:var(--navy3);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width 0.4s"></div></div><div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-top:0.3rem"><span>${conc} de ${f.atividades.length} concluídas</span><strong style="color:var(--gold)">${pct}%</strong></div></div>`;
+
+    // Atividades
+    const alDiv=document.createElement('div');alDiv.className='al';
+    f.atividades.forEach((atv,i)=>{
+      const done=!!(fd.atividades&&fd.atividades[i]);
+      const resp=getRespAtv(f.id,i);
+      const nota=getNotaAtv(f.id,i);
+
+      const aiDiv=document.createElement('div');aiDiv.className='ai-ext';
+      aiDiv.style.cssText='background:var(--navy2);border-radius:var(--r);margin-bottom:0.4rem;overflow:hidden;border:1px solid transparent;transition:border-color 0.2s';
+      if(done)aiDiv.style.borderColor='rgba(76,175,125,0.3)';
+
+      aiDiv.innerHTML=`
+        <div style="display:flex;align-items:center;gap:0.7rem;padding:0.65rem 0.85rem;cursor:${pEdit()?'pointer':'default'}">
+          <div class="ack ${done?'done':''}" id="ack-${f.id}-${i}"></div>
+          <span style="flex:1;font-size:0.85rem;${done?'text-decoration:line-through;color:var(--text2)':''}">${atv}</span>
+          <span style="font-size:0.68rem;color:${resp?'var(--gold)':'var(--text2)'};white-space:nowrap">${resp?'👤 '+resp:'Sem responsável'}</span>
+          <button onclick="toggleDetAtv('${f.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:0.75rem;padding:0.1rem 0.3rem;transition:color 0.15s" title="Detalhes">⋯</button>
+        </div>
+        <div id="det-${f.id}-${i}" style="display:none;padding:0 0.85rem 0.85rem;border-top:1px solid rgba(201,168,76,0.1)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.7rem">
+            <div>
+              <div style="font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Responsável</div>
+              <input type="text" value="${resp}" placeholder="Nome da responsável" onchange="salvarRespAtv('${f.id}',${i},this.value)" style="width:100%;padding:0.4rem 0.6rem;background:var(--navy);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.82rem;outline:none">
+            </div>
+            <div>
+              <div style="font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Status</div>
+              <select onchange="salvarStatusAtv('${f.id}',${i},this.value)" style="width:100%;padding:0.4rem 0.6rem;background:var(--navy);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.82rem;outline:none">
+                <option value="0" ${!done?'selected':''}>Pendente</option>
+                <option value="1" ${done?'selected':''}>Concluída</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:0.5rem">
+            <div style="font-size:0.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">Observações / Notas</div>
+            <textarea onchange="salvarNotaAtv('${f.id}',${i},this.value)" placeholder="Anotações, observações, dados coletados..." style="width:100%;padding:0.4rem 0.6rem;background:var(--navy);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.82rem;outline:none;resize:none;min-height:60px;font-family:'DM Sans',sans-serif">${nota}</textarea>
+          </div>
+        </div>`;
+
+      // Click na linha principal para marcar
+      if(pEdit()){
+        const mainRow=aiDiv.querySelector('div');
+        mainRow.addEventListener('click',(ev)=>{
+          if(ev.target.tagName==='BUTTON'||ev.target.tagName==='INPUT'||ev.target.tagName==='SELECT'||ev.target.tagName==='TEXTAREA')return;
+          toggleAtv(f.id,i);
+        });
+      }
+      alDiv.appendChild(aiDiv);
+    });
+    fbDiv.appendChild(alDiv);
+
+    // Ações da fase + importar/exportar
+    if(pEdit()){
+      const facDiv=document.createElement('div');facDiv.className='fac';
+      facDiv.style.cssText='margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center';
+      let btsHtml='';
+      if(st!=='andamento')btsHtml+=`<button class="btn bo bsm" onclick="mudarSt('${f.id}','andamento')">▶ Iniciar fase</button>`;
+      if(st!=='concluida')btsHtml+=`<button class="btn bg bsm" onclick="mudarSt('${f.id}','concluida')">✓ Concluir fase</button>`;
+      if(st==='concluida')btsHtml+=`<button class="btn bo bsm" onclick="mudarSt('${f.id}','andamento')">↩ Reabrir</button>`;
+      btsHtml+=`<div style="flex:1"></div>`;
+      btsHtml+=`<button class="btn bo bsm" onclick="exportarFase('${f.id}')">↓ Exportar fase</button>`;
+      btsHtml+=`<button class="btn bo bsm" onclick="document.getElementById('imp-${f.id}').click()">↑ Importar dados</button>`;
+      btsHtml+=`<input type="file" id="imp-${f.id}" accept=".json" style="display:none" onchange="importarFase('${f.id}',this)">`;
+      facDiv.innerHTML=btsHtml;
+      fbDiv.appendChild(facDiv);
+    }
+
+    fc.appendChild(fbDiv);
+    l.appendChild(fc);
   });
+}
+
+function toggleDetAtv(fid,idx){
+  const d=document.getElementById('det-'+fid+'-'+idx);
+  if(d)d.style.display=d.style.display==='none'?'block':'none';
+}
+
+async function salvarRespAtv(fid,idx,val){
+  if(!empA.fases)empA.fases={};
+  if(!empA.fases[fid])empA.fases[fid]={status:'pendente',atividades:{},resp:{},notas:{}};
+  if(!empA.fases[fid].resp)empA.fases[fid].resp={};
+  empA.fases[fid].resp[idx]=val;
+  salvarLocal();
+  if(typeof db!=='undefined'&&empA.id&&!empA.id.startsWith('local_')){
+    try{const u={};u['fases.'+fid+'.resp.'+idx]=val;await db.collection('empresas').doc(empA.id).update(u);}catch(e){}
+  }
+  renderFases2(); // re-render to update name display
+}
+
+async function salvarNotaAtv(fid,idx,val){
+  if(!empA.fases)empA.fases={};
+  if(!empA.fases[fid])empA.fases[fid]={status:'pendente',atividades:{},resp:{},notas:{}};
+  if(!empA.fases[fid].notas)empA.fases[fid].notas={};
+  empA.fases[fid].notas[idx]=val;
+  salvarLocal();
+  if(typeof db!=='undefined'&&empA.id&&!empA.id.startsWith('local_')){
+    try{const u={};u['fases.'+fid+'.notas.'+idx]=val;await db.collection('empresas').doc(empA.id).update(u);}catch(e){}
+  }
+}
+
+async function salvarStatusAtv(fid,idx,val){
+  const novoVal=val==='1';
+  if(!empA.fases)empA.fases={};
+  if(!empA.fases[fid])empA.fases[fid]={status:'pendente',atividades:{},resp:{},notas:{}};
+  if(!empA.fases[fid].atividades)empA.fases[fid].atividades={};
+  empA.fases[fid].atividades[idx]=novoVal;
+  salvarLocal();
+  if(typeof db!=='undefined'&&empA.id&&!empA.id.startsWith('local_')){
+    try{const u={};u['fases.'+fid+'.atividades.'+idx]=novoVal;await db.collection('empresas').doc(empA.id).update(u);}catch(e){}
+  }
+  renderDet();renderDash();
+}
+
+function exportarFase(fid){
+  if(!empA)return;
+  const fase=FASES.find(f=>f.id===fid);
+  const fd=empA.fases&&empA.fases[fid]||{};
+  const dados={
+    empresa:empA.nome,fase:fase?fase.nome:'',
+    atividades:(fase&&fase.atividades)?fase.atividades.map((atv,i)=>({
+      numero:i+1,atividade:atv,
+      concluida:!!(fd.atividades&&fd.atividades[i]),
+      responsavel:(fd.resp&&fd.resp[i])||'',
+      observacao:(fd.notas&&fd.notas[i])||''
+    })):[]
+  };
+  const csv=[['#','Atividade','Status','Responsável','Observações'],...dados.atividades.map(a=>[a.numero,a.atividade,a.concluida?'Concluída':'Pendente',a.responsavel,a.observacao])].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=empA.nome.replace(/\s+/g,'_')+'_'+(fase?fase.nome:'fase').replace(/\s+/g,'_')+'.csv';link.click();
+  toast('✅ Fase exportada!');
+}
+
+function importarFase(fid,input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!empA.fases)empA.fases={};
+      if(!empA.fases[fid])empA.fases[fid]={status:'pendente',atividades:{},resp:{},notas:{}};
+      if(data.atividades){
+        data.atividades.forEach((a,i)=>{
+          if(a.concluida!==undefined)empA.fases[fid].atividades[i]=a.concluida;
+          if(a.responsavel)empA.fases[fid].resp[i]=a.responsavel;
+          if(a.observacao)empA.fases[fid].notas[i]=a.observacao;
+        });
+      }
+      salvarLocal();renderDet();renderDash();
+      toast('✅ Dados importados!');
+    }catch(e){toast('❌ Arquivo inválido. Use JSON exportado pelo sistema.');}
+  };
+  reader.readAsText(input.files[0]);
+  input.value='';
 }
 
 function toggleFase(id){faA=faA===id?null:id;FASES.forEach(f=>{const b=document.getElementById('fb-'+f.id);if(b)b.classList.toggle('open',faA===f.id);});}
@@ -861,7 +1058,7 @@ function renderAnexos(){
   const div=document.getElementById('anx-list');
   if(!lista.length){div.innerHTML='<p style="color:var(--text2);font-size:0.82rem;margin-bottom:0.7rem">Nenhum anexo ainda</p>';return;}
   div.innerHTML=lista.map(a=>{
-    const icon=a.tipo?.includes('image')?'🖼️':a.tipo?.includes('pdf')?'📄':a.tipo?.includes('word')||a.tipo?.includes('doc')?'📝':a.tipo?.includes('excel')||a.tipo?.includes('sheet')?'📊':'📎';
+    const icon=a.tipo&&a.tipo.includes('image')?'🖼️':a.tipo&&a.tipo.includes('pdf')?'📄':a.tipo&&a.tipo.includes('word')||a.tipo&&a.tipo.includes('doc')?'📝':a.tipo&&a.tipo.includes('excel')||a.tipo&&a.tipo.includes('sheet')?'📊':'📎';
     const sz=a.size>1024*1024?(a.size/(1024*1024)).toFixed(1)+'MB':(a.size/1024).toFixed(0)+'KB';
     return`<div class="anx-item">${icon}<div class="anx-name">${a.nome}</div><span class="anx-type">${sz}</span><span class="anx-type">${a.data_upload||''}</span><button onclick="downloadAnx('${a.id}')" title="Baixar">⬇</button><button onclick="delAnx('${a.id}')" title="Excluir">✕</button></div>`;
   }).join('');
@@ -1051,6 +1248,83 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 // Redirecionar ir('pg-users') para renderUsers
 const _ir=ir;
 window.ir=function(id){_ir(id);if(id==='pg-users')setTimeout(renderUsers,50);};
+
+// ══ RELATÓRIO DO PROJETO ══
+function initRelProjeto(){
+  if(!empA)return;
+  // Preencher filtro fases
+  const sf=document.getElementById('rp-fase');
+  sf.innerHTML='<option value="">Todas as fases</option>';
+  FASES.forEach(f=>sf.innerHTML+=`<option value="${f.id}">${f.nome}</option>`);
+  // Preencher filtro responsáveis
+  const sr=document.getElementById('rp-resp');
+  const resps=new Set();
+  FASES.forEach(f=>{const fd=empA.fases&&empA.fases[f.id];if(fd&&fd.resp)Object.values(fd.resp).forEach(r=>{if(r)resps.add(r);});});
+  sr.innerHTML='<option value="">Todos os responsáveis</option>';
+  resps.forEach(r=>sr.innerHTML+=`<option value="${r}">${r}</option>`);
+  renderRelProjeto();
+}
+
+function renderRelProjeto(){
+  if(!empA)return;
+  const fFase=(document.getElementById('rp-fase')||{}).value||'';
+  const fSt=(document.getElementById('rp-status')||{}).value||'';
+  const fResp=(document.getElementById('rp-resp')||{}).value||'';
+  let fasesF=fFase?[FASES.find(f=>f.id===fFase)].filter(Boolean):FASES;
+
+  // Cards resumo por responsável
+  const respMap={};
+  fasesF.forEach(f=>{
+    const fd=empA.fases&&empA.fases[f.id]||{};
+    f.atividades.forEach((atv,i)=>{
+      const done=!!(fd.atividades&&fd.atividades[i]);
+      const resp=(fd.resp&&fd.resp[i])||'Sem responsável';
+      if(!respMap[resp])respMap[resp]={total:0,conc:0};
+      respMap[resp].total++;
+      if(done)respMap[resp].conc++;
+    });
+  });
+  const cardsDiv=document.getElementById('rel-proj-cards');
+  cardsDiv.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem;margin-bottom:1.2rem">${Object.entries(respMap).map(([r,v])=>{const p=Math.round((v.conc/v.total)*100);return`<div class="rel-card"><h4>👤 ${r}</h4><div style="display:flex;justify-content:space-between;font-size:0.82rem"><span style="color:var(--text2)">${v.conc}/${v.total} atividades</span><strong style="color:var(--gold)">${p}%</strong></div><div style="height:4px;background:var(--navy2);border-radius:99px;overflow:hidden;margin-top:0.5rem"><div style="height:100%;width:${p}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px"></div></div></div>`;}).join('')}</div>`;
+
+  // Tabela detalhada
+  const tb=document.getElementById('tbody-rel-proj');tb.innerHTML='';
+  let rows=[];
+  fasesF.forEach(f=>{
+    const fd=empA.fases&&empA.fases[f.id]||{};
+    f.atividades.forEach((atv,i)=>{
+      const done=!!(fd.atividades&&fd.atividades[i]);
+      const resp=(fd.resp&&fd.resp[i])||'';
+      const nota=(fd.notas&&fd.notas[i])||'';
+      if(fSt==='0'&&done)return;
+      if(fSt==='1'&&!done)return;
+      if(fResp&&resp!==fResp)return;
+      const stl=done?'<span class="fst sc">Concluída</span>':'<span class="fst sp">Pendente</span>';
+      rows.push(`<tr style="border-bottom:1px solid rgba(201,168,76,0.06)"><td style="padding:0.65rem 0.9rem;font-size:0.8rem;color:var(--text2)">${f.nome}</td><td style="padding:0.65rem 0.9rem;font-size:0.82rem">${atv}</td><td style="padding:0.65rem 0.9rem;font-size:0.82rem;color:${resp?'var(--gold)':'var(--text2)'}">${resp||'—'}</td><td style="padding:0.65rem 0.9rem">${stl}</td><td style="padding:0.65rem 0.9rem;font-size:0.78rem;color:var(--text2);max-width:200px">${nota||'—'}</td></tr>`);
+    });
+  });
+  tb.innerHTML=rows.join('')||'<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text2)">Nenhum resultado com os filtros selecionados</td></tr>';
+}
+
+function exportarRelProjeto(){
+  if(!empA)return;
+  const fFase=(document.getElementById('rp-fase')||{}).value||'';
+  const fasesF=fFase?[FASES.find(f=>f.id===fFase)].filter(Boolean):FASES;
+  const rows=[['Empresa','Fase','Atividade','Status','Responsável','Observações']];
+  fasesF.forEach(f=>{
+    const fd=empA.fases&&empA.fases[f.id]||{};
+    f.atividades.forEach((atv,i)=>{
+      const done=!!(fd.atividades&&fd.atividades[i]);
+      const resp=(fd.resp&&fd.resp[i])||'';
+      const nota=(fd.notas&&fd.notas[i])||'';
+      rows.push([empA.nome,f.nome,atv,done?'Concluída':'Pendente',resp,nota]);
+    });
+  });
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='Relatorio_'+empA.nome.replace(/\s+/g,'_')+'.csv';link.click();
+  toast('✅ Relatório exportado!');
+}
 
 // Auto login
 const s=getSess();if(s){iniciar(s);}
