@@ -63,7 +63,7 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
 .sb-item{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 1.2rem;cursor:pointer;transition:all 0.2s;font-size:0.85rem;color:var(--text2);border-left:3px solid transparent;margin:0.1rem 0;}
 .sb-item:hover{background:var(--gold-dim);color:var(--text);}
 .sb-item.active{background:var(--gold-dim);color:var(--gold);border-left-color:var(--gold);}
-.sb-item .icon{font-size:1rem;width:20px;text-align:center;}
+.sb-item .icon{font-size:1rem;width:20px;text-align:center;color:rgba(201,168,76,0.5);font-style:normal;}.sb-item.active .icon{color:var(--gold);}.sb-item:hover .icon{color:var(--gold);}
 .sb-user{padding:1rem 1.2rem;border-top:1px solid var(--border);}
 .sb-user-info{display:flex;align-items:center;gap:0.8rem;}
 .sb-avatar{width:34px;height:34px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:0.78rem;flex-shrink:0;}
@@ -286,19 +286,19 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
     </div>
     <nav class="sb-nav">
       <div class="sb-section">Principal</div>
-      <div class="sb-item active" onclick="irPara('pg-dashboard')" data-page="pg-dashboard"><span class="icon">📊</span>Dashboard Geral</div>
-      <div class="sb-item" onclick="irPara('pg-empresas')" data-page="pg-empresas"><span class="icon">🏢</span>Empresas</div>
+      <div class="sb-item active" onclick="irPara('pg-dashboard')" data-page="pg-dashboard"><span class="icon">▣</span>Dashboard Geral</div>
+      <div class="sb-item" onclick="irPara('pg-empresas')" data-page="pg-empresas"><span class="icon">◈</span>Empresas</div>
       <div class="sb-section">Operacional</div>
-      <div class="sb-item" onclick="irPara('pg-cargos')" data-page="pg-cargos"><span class="icon">📋</span>Cargos</div>
-      <div class="sb-item" onclick="irPara('pg-trilhas')" data-page="pg-trilhas"><span class="icon">🛤️</span>Trilhas de Carreira</div>
-      <div class="sb-item" onclick="irPara('pg-salarios')" data-page="pg-salarios"><span class="icon">💰</span>Tabelas Salariais</div>
-      <div class="sb-item" onclick="irPara('pg-diagnostico')" data-page="pg-diagnostico"><span class="icon">🔍</span>Diagnóstico</div>
+      <div class="sb-item" onclick="irPara('pg-cargos')" data-page="pg-cargos"><span class="icon">◧</span>Cargos</div>
+      <div class="sb-item" onclick="irPara('pg-trilhas')" data-page="pg-trilhas"><span class="icon">◈</span>Trilhas de Carreira</div>
+      <div class="sb-item" onclick="irPara('pg-salarios')" data-page="pg-salarios"><span class="icon">◉</span>Tabelas Salariais</div>
+      <div class="sb-item" onclick="irPara('pg-diagnostico')" data-page="pg-diagnostico"><span class="icon">◎</span>Diagnóstico</div>
       <div class="sb-section">Gestão</div>
-      <div class="sb-item" onclick="irPara('pg-implantacao')" data-page="pg-implantacao"><span class="icon">🚀</span>Implantação</div>
-      <div class="sb-item" onclick="irPara('pg-governanca')" data-page="pg-governanca"><span class="icon">🛡️</span>Governança</div>
-      <div class="sb-item" onclick="irPara('pg-relatorios')" data-page="pg-relatorios"><span class="icon">📄</span>Relatórios</div>
+      <div class="sb-item" onclick="irPara('pg-implantacao')" data-page="pg-implantacao"><span class="icon">▷</span>Implantação</div>
+      <div class="sb-item" onclick="irPara('pg-governanca')" data-page="pg-governanca"><span class="icon">◆</span>Governança</div>
+      <div class="sb-item" onclick="irPara('pg-relatorios')" data-page="pg-relatorios"><span class="icon">▤</span>Relatórios</div>
       <div class="sb-section" id="sb-admin-section" style="display:none">Administração</div>
-      <div class="sb-item" onclick="irPara('pg-usuarios')" data-page="pg-usuarios" id="sb-usuarios" style="display:none"><span class="icon">👥</span>Usuários</div>
+      <div class="sb-item" onclick="irPara('pg-usuarios')" data-page="pg-usuarios" id="sb-usuarios" style="display:none"><span class="icon">◉</span>Usuários</div>
     </nav>
     <div class="sb-user">
       <div class="sb-user-info">
@@ -327,11 +327,11 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
     <!-- DASHBOARD GERAL -->
     <div class="page active" id="pg-dashboard">
       <div class="cards-grid">
-        <div class="card gold"><div class="card-icon">🏢</div><div class="card-num" id="c-total">0</div><div class="card-lbl">Empresas</div></div>
-        <div class="card blue"><div class="card-icon">⚡</div><div class="card-num" id="c-andamento">0</div><div class="card-lbl">Em andamento</div></div>
-        <div class="card green"><div class="card-icon">✅</div><div class="card-num" id="c-concluidos">0</div><div class="card-lbl">Concluídos</div></div>
-        <div class="card warn"><div class="card-icon">⏳</div><div class="card-num" id="c-pendentes">0</div><div class="card-lbl">Pendentes</div></div>
-        <div class="card gold"><div class="card-icon">📊</div><div class="card-num" id="c-media">0%</div><div class="card-lbl">Média progresso</div></div>
+        <div class="card gold"><div style="width:42px;height:42px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="11" x2="12" y2="15"/><line x1="10" y1="13" x2="14" y2="13"/></svg></div><div class="card-num" id="c-total">0</div><div class="card-lbl">Total de Empresas</div></div>
+        <div class="card gold"><div style="width:42px;height:42px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="card-num" id="c-andamento">0</div><div class="card-lbl">Em Andamento</div></div>
+        <div class="card gold"><div style="width:42px;height:42px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><polyline points="9 12 11 14 15 10"/></svg></div><div class="card-num" id="c-concluidos">0</div><div class="card-lbl">Concluídos</div></div>
+        <div class="card gold"><div style="width:42px;height:42px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="card-num" id="c-pendentes">0</div><div class="card-lbl">Pendentes</div></div>
+        <div class="card gold"><div style="width:42px;height:42px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div><div class="card-num" id="c-media">0%</div><div class="card-lbl">Média de Progresso</div></div>
       </div>
 
       <!-- GRÁFICOS -->
