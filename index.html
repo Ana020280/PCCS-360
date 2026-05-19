@@ -471,12 +471,15 @@ function entrar() {
   erro.textContent = '';
   if (!email||!senha) { erro.textContent='⚠️ Preencha e-mail e senha.'; return; }
 
-  loginEmail(email, senha)
-    .then(cred => {
-      const nome = (typeof currentPerfil!=='undefined' && currentPerfil?.nome) || cred.user.displayName || cred.user.email;
-      mostrarDashboard(nome);
-    })
-    .catch(() => { erro.textContent = '❌ E-mail ou senha incorretos.'; });
+  // Login direto sem Firebase Auth
+  const USUARIO = 'anakatia@institutoprimazia.com.br';
+  const SENHA   = 'Ana@028079';
+
+  if (email === USUARIO && senha === SENHA) {
+    mostrarDashboard('Ana Kátia');
+  } else {
+    erro.textContent = '❌ E-mail ou senha incorretos.';
+  }
 }
 
 function logout() {
@@ -587,14 +590,7 @@ function setupListener(id){if(typeof db==='undefined')return;db.collection('empr
 
 document.getElementById('modal-empresa').addEventListener('click',function(e){if(e.target===this)fecharModal();});
 
-if(typeof auth!=='undefined'){
-  auth.onAuthStateChanged(user=>{
-    if(user){
-      const nome=(typeof currentPerfil!=='undefined'&&currentPerfil?.nome)||user.displayName||user.email;
-      mostrarDashboard(nome);
-    }
-  });
-}
+// Auth observer desativado — login direto ativo
 </script>
 </body>
 </html>
