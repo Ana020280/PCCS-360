@@ -843,11 +843,24 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
       <div class="fg"><label>Departamento</label><input class="inp" id="col-dept" placeholder="Ex: Produção"></div>
       <div class="fg"><label>Centro de Custo</label><input class="inp" id="col-centro-custo" placeholder="Ex: CC-001"></div>
       <div class="fg"><label>Gestor Imediato</label><input class="inp" id="col-gestor" placeholder="Nome do gestor"></div>
+      <div class="fg"><label>Unidade / Empresa</label>
+        <select class="sel" id="col-unidade">
+          <option value="">Selecione...</option>
+          <option>SM Madeiras</option>
+          <option>SM Agroflorestal - Faz. Santa Cruz</option>
+          <option>SM Agroflorestal - Faz. Ouro Preto</option>
+          <option>SM Agroflorestal - Extração Tolardo/Vespor</option>
+          <option>SM Agroflorestal - Faz. Taguaruçu (Gado)</option>
+          <option>SM Agroflorestal - Faz. Bom Retiro</option>
+          <option>SM Agroflorestal - Faz. Madaje</option>
+          <option>Agroindustrial RB</option>
+        </select>
+      </div>
       <div class="fg"><label>Tipo de Vínculo</label>
         <select class="sel" id="col-vinculo">
           <option value="">Selecione...</option>
           <option>CLT</option><option>PJ</option><option>Estagiário</option>
-          <option>Aprendiz</option><option>Autônomo</option><option>Temporário</option>
+          <option>Jovem Aprendiz</option><option>Autônomo</option><option>Temporário</option><option>Terceirizado</option>
         </select>
       </div>
       <div class="fg"><label>Jornada de Trabalho</label><input class="inp" id="col-jornada" placeholder="Ex: 44h/semana, 8h/dia"></div>
@@ -862,7 +875,30 @@ body{background:var(--navy3);color:var(--text);font-family:'DM Sans',sans-serif;
         <input type="checkbox" id="col-grat40" style="width:16px;height:16px;accent-color:var(--gold)">
         <label style="font-size:0.82rem;color:var(--text);text-transform:none;letter-spacing:0">Recebe 40% de gratificação?</label>
       </div>
-      <div class="fg"><label>Benefícios</label><input class="inp" id="col-beneficios" placeholder="Ex: VR, VT, Plano de saúde"></div>
+      <div class="fg"><label>Benefícios</label><input class="inp" id="col-beneficios" placeholder="Ex: VT + VR + Plano de saúde"></div>
+      <div class="fg"><label>Situação (Sistema DP)</label>
+        <select class="sel" id="col-situacao">
+          <option value="">Selecione...</option>
+          <option value="1">1 - Trabalhando</option>
+          <option value="2">2 - Afastado Direitos Integrais</option>
+          <option value="3">3 - Acid. Trabalho período > 15 dias</option>
+          <option value="4">4 - Serviço Militar</option>
+          <option value="5">5 - Licença Maternidade</option>
+          <option value="6">6 - Doença período > 15 dias</option>
+          <option value="7">7 - Licença sem Vencimento</option>
+          <option value="8">8 - Demitido</option>
+          <option value="9">9 - Férias</option>
+          <option value="10">10 - Novo Afastamento mesmo acidente</option>
+          <option value="11">11 - Antecipação/Prorrogação Lic. Maternidade</option>
+          <option value="12">12 - Novo afastamento mesma doença</option>
+          <option value="13">13 - Mandato Sindical</option>
+          <option value="14">14 - Aposentado por acidente de trabalho</option>
+          <option value="15">15 - Aposentado por doença profissional</option>
+          <option value="17">17 - Acid. Trabalho período ≤ 15 dias</option>
+          <option value="18">18 - Doença período ≤ 15 dias</option>
+          <option value="24">24 - Outros motivos de afastamento</option>
+        </select>
+      </div>
       <div class="fg"><label>Status de Validação</label>
         <select class="sel" id="col-status">
           <option value="pendente">Pendente</option>
@@ -2134,7 +2170,7 @@ function salvarColaborador(){
   if(!nome){toast('Informe o nome do colaborador');return;}
   const toInt=(id)=>Number((document.getElementById(id)&&document.getElementById(id).value)||0)||0;
   const toStr=(id)=>(document.getElementById(id)&&document.getElementById(id).value)||'';
-  const col={id:editColId||'col_'+Date.now(),nome,cpf:toStr('col-cpf'),cargo:toStr('col-cargo'),cargoReal:toStr('col-cargo-real'),cbo:toStr('col-cbo'),departamento:toStr('col-dept'),centroCusto:toStr('col-centro-custo'),gestor:toStr('col-gestor'),vinculo:toStr('col-vinculo'),jornada:toStr('col-jornada'),dataAdmAntiga:toStr('col-adm-antiga'),dataAdmissao:toStr('col-adm-atual'),salBase:toStr('col-sal-base'),valorPorFora:toStr('col-val-fora'),comissao:toStr('col-comissao'),premiacao:toStr('col-premiacao'),gratificacao:toStr('col-gratificacao'),grat40:document.getElementById('col-grat40')&&document.getElementById('col-grat40').checked,beneficios:toStr('col-beneficios'),obs:toStr('col-obs'),status:toStr('col-status'),atualizadoEm:new Date().toISOString()};
+  const col={id:editColId||'col_'+Date.now(),nome,cpf:toStr('col-cpf'),cargo:toStr('col-cargo'),cargoReal:toStr('col-cargo-real'),cbo:toStr('col-cbo'),departamento:toStr('col-dept'),centroCusto:toStr('col-centro-custo'),gestor:toStr('col-gestor'),unidade:toStr('col-unidade'),unidade:toStr('col-unidade'),vinculo:toStr('col-vinculo'),jornada:toStr('col-jornada'),situacao:toStr('col-situacao'),situacao:toStr('col-situacao'),dataAdmAntiga:toStr('col-adm-antiga'),dataAdmissao:toStr('col-adm-atual'),salBase:toStr('col-sal-base'),valorPorFora:toStr('col-val-fora'),comissao:toStr('col-comissao'),premiacao:toStr('col-premiacao'),gratificacao:toStr('col-gratificacao'),grat40:document.getElementById('col-grat40')&&document.getElementById('col-grat40').checked,beneficios:toStr('col-beneficios'),obs:toStr('col-obs'),status:toStr('col-status'),atualizadoEm:new Date().toISOString()};
   const lista=getF1Cols();
   if(editColId){const idx=lista.findIndex(c=>c.id===editColId);if(idx>=0)lista[idx]=col;}else{lista.push(col);}
   setF1Cols(lista);fechar('mo-colaborador');
@@ -2176,49 +2212,103 @@ function exportarColaboradoresF1(){
   const lista=getF1Cols();
   if(!lista.length){toast('Nenhum colaborador cadastrado');return;}
   const headers=['Nome','CPF','Cargo','Cargo Real','CBO','Departamento','Centro Custo','Gestor','Vínculo','Jornada','Adm.Antiga','Adm.Atual','Sal.Base','Val.Fora','Comissão','Premiação','Gratificação','Grat.40%','Benefícios','Status','Observações'];
-  const rows=[headers,...lista.map(c=>[c.nome,c.cpf,c.cargo,c.cargoReal,c.cbo,c.departamento,c.centroCusto,c.gestor,c.vinculo,c.jornada,c.dataAdmAntiga,c.dataAdmissao,c.salBase,c.valorPorFora,c.comissao,c.premiacao,c.gratificacao,c.grat40?'Sim':'Não',c.beneficios,c.status,c.obs])];
+  const rows=[headers,...lista.map(function(c){return[c.nome,c.cpf,c.unidade||'',c.cargo,c.cargoReal,c.cbo,c.departamento,c.centroCusto,c.gestor,c.vinculo,c.jornada,c.dataAdmissao,c.salBase,c.valorPorFora,c.comissao,c.premiacao,c.gratificacao,c.grat40?'Sim':'Nao',c.beneficios,c.situacao||'',c.status,c.obs];})];
   const csv=rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
   const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='Colaboradores_'+empA.nome.replace(/[ ]+/g,'_')+'.csv';link.click();toast('Exportado!');
 }
 
 function importarModeloCSV(){
-  const headers=['Nome','CPF','Cargo','Cargo Real','CBO','Departamento','Centro de Custo','Gestor','Tipo Vínculo','Jornada','Data Adm.Antiga','Data Adm.Atual','Salário Base','Valores por Fora','Comissão','Premiação','Gratificação','Recebe 40% Gratificação (S/N)','Benefícios','Observações'];
-  const csv=headers.map(h=>'"'+h+'"').join(',')+'\n"Exemplo Colaborador","000.000.000-00","Auxiliar Operacional","Auxiliar de Produção","","Produção","","Gestor Nome","CLT","44h","2020-01-01","2020-01-01","2200.00","","","","","N","Vale Refeição",""';
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
-  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='MODELO_Colaboradores_PCCS360.csv';link.click();toast('Modelo baixado!');
+  var cols=['Nome','CPF','Data Admissao','Cargo CTPS','Funcao Real','Departamento','Unidade','Gestor Imediato','Vinculo','Jornada','Salario Base','Valores por Fora','Comissao','Premiacao','Gratificacao','Grat 40% (S/N)','Beneficios','Situacao','Observacoes'];
+  var row1=cols.map(function(c){return '"'+c+'"';}).join(',');
+  var row2='"Colaborador Exemplo","000.000.000-00","2020-01-15","Auxiliar de Producao","Operador de Maquina","Producao","SM Madeiras","Nome do Gerente","CLT","44h semana","2200.00","","","","","N","VT + VR","1 - Trabalhando",""';
+  var row3='"SITUACOES: 1=Trabalhando | 2=Afastado Dir.Integrais | 3=Acid.Trab>15d | 4=Servico Militar | 5=Lic.Maternidade | 6=Doenca>15d | 7=Lic.sem Vencimento | 8=Demitido | 9=Ferias | 12=Novo Afast.mesma Doenca | 14=Aposent.Acid.Trab | 15=Aposent.Doenca Prof | 17=Acid.<=15d | 18=Doenca<=15d | 24=Outros","","","","","","","","","","","","","","","","",""';
+  var csv=row1+'\n'+row2+'\n'+row3;
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  var link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='MODELO_SM_Madeiras_PCCS360.csv';link.click();toast('Modelo baixado!');
 }
 
 function importarF1(files){
   if(!files||!files.length)return;
-  const f=files[0];
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    // Parse CSV
-    if(f.name.endsWith('.csv')||f.name.endsWith('.xls')||f.name.endsWith('.xlsx')){
-      const text=ev.target.result;
-      const linhas=text.split('\n').filter(l=>l.trim());
-      if(linhas.length<2){toast('Arquivo sem dados suficientes');return;}
-      const headers=linhas[0].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
-      const cols=[];
-      linhas.slice(1).forEach(linha=>{
-        const vals=linha.split(',').map(v=>v.replace(/^"|"$/g,'').trim());
-        if(!vals[0])return;
-        const col={id:'col_'+Date.now()+'_'+Math.random().toString(36).slice(2),nome:vals[0]||'',cpf:vals[1]||'',cargo:vals[2]||'',cargoReal:vals[3]||'',cbo:vals[4]||'',departamento:vals[5]||'',centroCusto:vals[6]||'',gestor:vals[7]||'',vinculo:vals[8]||'',jornada:vals[9]||'',dataAdmAntiga:vals[10]||'',dataAdmissao:vals[11]||'',salBase:vals[12]||'',valorPorFora:vals[13]||'',comissao:vals[14]||'',premiacao:vals[15]||'',gratificacao:vals[16]||'',grat40:(vals[17]||'').toLowerCase()==='s'||(vals[17]||'').toLowerCase()==='sim',beneficios:vals[18]||'',obs:vals[19]||'',status:'pendente',atualizadoEm:new Date().toISOString()};
-        cols.push(col);
-      });
-      if(cols.length===0){toast('Nenhum dado encontrado no arquivo');return;}
-      const inc=detectarInconsistencias(cols);
-      const msg=`Encontrei ${cols.length} colaborador(es) no arquivo.
-${inc.length>0?inc.length+' inconsistencias detectadas. ':''}
-Deseja importar e validar os dados?`;
-      if(confirm(msg)){
-        const atual=getF1Cols();const todos=[...atual,...cols];setF1Cols(todos);
-        const cont=document.getElementById('f1-dash-container');if(cont)cont.innerHTML=renderFase1Dashboard();
-        renderTabelaColaboradores();toast(cols.length+' colaboradores importados!');
-      }
-    } else {
-      toast('CSV importado! Para PDF/Word, copie os dados e use o cadastro manual.');
+  var f=files[0];
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var text=ev.target.result;
+    var linhas=text.split('\n').filter(function(l){return l.trim()&&!l.startsWith('"SITUACOES');});
+    if(linhas.length<2){toast('Arquivo sem dados suficientes');return;}
+    // Detect columns from header
+    var rawHeader=linhas[0];
+    var headers=rawHeader.split(',').map(function(h){return h.replace(/^"|"$/g,'').trim().toLowerCase();});
+    
+    // Column index detection (flexible - handles different orders)
+    function col(keys){for(var i=0;i<headers.length;i++){for(var k=0;k<keys.length;k++){if(headers[i].includes(keys[k]))return i;}}return -1;}
+    var iNome=col(['nome']);
+    var iCPF=col(['cpf']);
+    var iAdm=col(['admiss','data adm','data_adm']);
+    var iCargo=col(['cargo ctps','cargo regist','cargo']);
+    var iFuncao=col(['funcao','função real','func']);
+    var iDept=col(['departamento','dept']);
+    var iUnidade=col(['unidade','empresa']);
+    var iGestor=col(['gestor']);
+    var iVinculo=col(['vinculo','vínculo']);
+    var iJornada=col(['jornada']);
+    var iSal=col(['salario','salário base']);
+    var iVFora=col(['por fora','valores por fora']);
+    var iComissao=col(['comiss']);
+    var iPremio=col(['premiac','prêmio']);
+    var iGrat=col(['gratificac']);
+    var iGrat40=col(['40%','grat 40']);
+    var iBenef=col(['benefic']);
+    var iSituacao=col(['situac','status','situação']);
+    var iObs=col(['observ','obs']);
+
+    var vals=function(linha){return linha.split(',').map(function(v){return v.replace(/^"|"$/g,'').trim();});};
+    
+    var cols=[];
+    linhas.slice(1).forEach(function(linha,li){
+      var v=vals(linha);
+      if(!v[Math.max(0,iNome)]&&!v[0])return;
+      var nome=iNome>=0?v[iNome]:v[0];
+      if(!nome||nome.length<2)return;
+      var col={
+        id:'col_'+Date.now()+'_'+li,
+        nome:nome,
+        cpf:iCPF>=0?v[iCPF]:'',
+        dataAdmissao:iAdm>=0?v[iAdm]:'',
+        dataAdmAntiga:iAdm>=0?v[iAdm]:'',
+        cargo:iCargo>=0?v[iCargo]:'',
+        cargoReal:iFuncao>=0?v[iFuncao]:'',
+        departamento:iDept>=0?v[iDept]:'',
+        unidade:iUnidade>=0?v[iUnidade]:'',
+        gestor:iGestor>=0?v[iGestor]:'',
+        vinculo:iVinculo>=0?v[iVinculo]:'',
+        jornada:iJornada>=0?v[iJornada]:'',
+        salBase:iSal>=0?v[iSal]:'',
+        valorPorFora:iVFora>=0?v[iVFora]:'',
+        comissao:iComissao>=0?v[iComissao]:'',
+        premiacao:iPremio>=0?v[iPremio]:'',
+        gratificacao:iGrat>=0?v[iGrat]:'',
+        grat40:iGrat40>=0?(v[iGrat40].toLowerCase()==='s'||v[iGrat40].toLowerCase()==='sim'):false,
+        beneficios:iBenef>=0?v[iBenef]:'',
+        situacao:iSituacao>=0?v[iSituacao]:'',
+        obs:iObs>=0?v[iObs]:'',
+        status:'pendente',
+        atualizadoEm:new Date().toISOString()
+      };
+      cols.push(col);
+    });
+
+    if(cols.length===0){toast('Nenhum dado encontrado. Verifique o formato do arquivo.');return;}
+    var inc=detectarInconsistencias(cols);
+    var msg='Encontrei '+cols.length+' colaborador(es) no arquivo.\n'+(inc.length>0?inc.length+' inconsistencias detectadas.\n':'')+'\nDeseja importar e validar os dados?';
+    if(confirm(msg)){
+      var atual=getF1Cols();
+      var todos=atual.concat(cols);
+      setF1Cols(todos);
+      var cont=document.getElementById('f1-dash-container');
+      if(cont)cont.innerHTML=renderFase1Dashboard();
+      renderTabelaColaboradores();
+      toast(cols.length+' colaboradores importados!');
     }
   };
   reader.readAsText(f,'utf-8');
@@ -2228,7 +2318,8 @@ Deseja importar e validar os dados?`;
 // DEPARTAMENTOS
 function abrirModalDept(){abrir('mo-dept');}
 function adicionarDeptsPadrao(){
-  const padrao=['Administrativo','Financeiro','Recursos Humanos','Tecnologia','Produção','Operacional','Logística','Comercial','Manutenção','Gestão'];
+  // SM Madeiras departments from organogram
+  const padrao=['Qualidade','Comercial','Faturamento','Engenharia Florestal e Certificacao','Patio','Producao','Contabil','Fiscal','Pessoal','Seguranca do Trabalho','Recepcao','Tecnologia','Financeiro','Carpintaria e Manutencao Predial','Compras','Manutencao','Seguranca','Administrativo','Recursos Humanos','Logistica','Operacional'];
   const atual=getF1Depts();const nomesAtuais=atual.map(d=>d.nome);
   const novos=padrao.filter(n=>!nomesAtuais.includes(n)).map(n=>({id:'dept_'+Date.now()+'_'+Math.random().toString(36).slice(2),nome:n,status:'ativo',criadoEm:new Date().toISOString()}));
   setF1Depts([...atual,...novos]);
