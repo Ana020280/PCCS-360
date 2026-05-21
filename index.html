@@ -300,6 +300,7 @@ input[type="date"].inp{color-scheme:dark}
         <div class="sb-lbl">GESTÃO</div>
         <button class="ni" data-v="vrel" onclick="nav('vrel')"><span class="ni-ico">◕</span>Relatórios</button>
         <button class="ni" data-v="vconf" onclick="nav('vconf')"><span class="ni-ico">◗</span>Configurações</button>
+        <button class="ni" data-v="vlog" onclick="nav('vlog')"><span class="ni-ico">◆</span>Registro de Alterações</button>
       </div>
       <div class="sb-sec">
         <div class="sb-lbl">ADMINISTRAÇÃO</div>
@@ -375,7 +376,7 @@ input[type="date"].inp{color-scheme:dark}
     <div class="srow" id="det-stats"></div>
     <div class="tabs" id="projeto-tabs">
       <button class="tab on" onclick="tabP('tp0',this)">◈ Visão Geral</button>
-      <button class="tab" onclick="tabP('tp1',this)">◉ Fases PCCS</button>
+      <button class="tab" onclick="tabP('tp1',this)">◉ Fases do PCCS</button>
       <button class="tab" onclick="tabP('tp2',this)">◎ Kanban</button>
       <button class="tab" onclick="tabP('tp3',this)">◐ Performance</button>
       <button class="tab" onclick="tabP('tp4',this)">◑ Colaboradores</button>
@@ -383,6 +384,7 @@ input[type="date"].inp{color-scheme:dark}
       <button class="tab" onclick="tabP('tp6',this)">◓ Inconsistências</button>
       <button class="tab" onclick="tabP('tp7',this)">◔ IA Organizacional</button>
       <button class="tab" onclick="tabP('tp8',this)">◕ Relatórios Op.</button>
+      <button class="tab" onclick="tabP('tp9',this)">◖ Anexos</button>
     </div>
 
     <div id="tp0">
@@ -424,7 +426,7 @@ input[type="date"].inp{color-scheme:dark}
         <select class="inp" id="fil-depto" onchange="filtrarColabs()" style="width:180px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os departamentos</option></select>
         <select class="inp" id="fil-sit" onchange="filtrarColabs()" style="width:140px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os status</option><option>Trabalhando</option><option>Férias</option><option>Afastado INSS</option><option>Desligado</option><option>Outro</option></select>
       </div>
-      <div class="tw"><table><thead><tr><th>Nome</th><th>CPF</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Salário</th><th>Situação</th><th></th></tr></thead><tbody id="colabs-tbody"></tbody></table></div>
+      <div class="tw"><table><thead><tr><th>Nome</th><th>CPF</th><th>Cargo CTPS</th><th>Função Real</th><th>Departamento</th><th>Salário</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="colabs-tbody"></tbody></table></div>
     </div>
 
     <div id="tp5" style="display:none">
@@ -447,6 +449,13 @@ input[type="date"].inp{color-scheme:dark}
     <div id="tp8" style="display:none">
       <div style="margin-bottom:1rem"><button class="btn bg bs" onclick="openRop()">+ Novo Relatório Operacional</button></div>
       <div id="rop-list"></div>
+    </div>
+
+    <div id="tp9" style="display:none">
+      <div style="margin-bottom:1rem">
+        <label class="btn bg bs" style="cursor:pointer">&#128206; Adicionar Anexo<input type="file" multiple accept=".pdf,.doc,.docx,.xlsx,.jpg,.png" style="display:none" onchange="addAnexoProj(this)"></label>
+      </div>
+      <div id="proj-anexos-list"></div>
     </div>
   </div>
 </div>
@@ -503,6 +512,15 @@ input[type="date"].inp{color-scheme:dark}
       <div class="card"><div class="sec-t">◈ Backup de Dados</div><p style="font-size:.82rem;color:var(--t2);margin-bottom:1rem">Exporte todos os dados para backup seguro.</p><div style="display:flex;gap:.6rem;flex-wrap:wrap"><button class="btn bo" onclick="backup()">&#11015; Exportar</button><label class="btn bh" style="cursor:pointer">&#11014; Restaurar<input type="file" accept=".json" style="display:none" onchange="restaurar(this)"></label></div></div>
       <div class="card"><div class="sec-t">◉ Sobre o Sistema</div><div style="font-size:.82rem;color:var(--t2);line-height:1.9"><p><strong style="color:var(--gd)">PCCS 360</strong> v3.0</p><p>Instituto Primazia · © 2026</p></div></div>
     </div>
+  </div>
+</div>
+
+
+<!-- REGISTRO DE ALTERAÇÕES -->
+<div class="view" id="vlog">
+  <div class="phdr"><div><h2>Registro de <em>Alterações</em></h2><p>Histórico de mudanças e melhorias do sistema</p></div><div class="phdr-r"><button class="btn bg" onclick="openM('mlog')">+ Registrar Alteração</button></div></div>
+  <div class="content">
+    <div class="tw"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Responsável</th><th>Status</th><th></th></tr></thead><tbody id="log-tbody"></tbody></table></div>
   </div>
 </div>
 
@@ -654,31 +672,91 @@ input[type="date"].inp{color-scheme:dark}
   </div>
 </div>
 
+<div class="ov" id="mlog">
+  <div class="modal" style="max-width:560px">
+    <div class="mhdr"><h3>◆ Registrar Alteração</h3><button class="mcl" onclick="closeM('mlog')">&#10005;</button></div>
+    <div class="fr">
+      <div class="fg"><label>Tipo</label><select class="inp" id="log-tipo"><option>Nova Funcionalidade</option><option>Melhoria</option><option>Correção</option><option>Solicitação</option></select></div>
+      <div class="fg"><label>Status</label><select class="inp" id="log-status"><option>Implementado</option><option>Em desenvolvimento</option><option>Solicitado</option><option>Pendente</option></select></div>
+    </div>
+    <div class="fg"><label>Descrição *</label><textarea class="inp" id="log-desc" rows="3" placeholder="Descreva a alteração..."></textarea></div>
+    <div class="fr">
+      <div class="fg"><label>Responsável</label><input class="inp" id="log-resp" placeholder="Nome do responsável"></div>
+      <div class="fg"><label>Data</label><input class="inp" type="date" id="log-data"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem"><button class="btn bh" onclick="closeM('mlog')">Cancelar</button><button class="btn bg" onclick="salvarLog()">Registrar</button></div>
+  </div>
+</div>
+
+<!-- COLABORADOR DETALHE MODAL -->
+<div class="ov" id="mcolab-det">
+  <div class="modal" style="max-width:680px;max-height:92vh">
+    <div class="mhdr"><h3 id="colab-det-titulo">◕ Cadastro do Colaborador</h3><button class="mcl" onclick="closeM('mcolab-det')">&#10005;</button></div>
+    <input type="hidden" id="colab-det-idx">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <div class="fg"><label>Nome Completo *</label><input class="inp" id="cd-nome"></div>
+      <div class="fg"><label>CPF</label><input class="inp" id="cd-cpf" placeholder="000.000.000-00"></div>
+      <div class="fg"><label>Data Nascimento</label><input class="inp" type="date" id="cd-nasc"></div>
+      <div class="fg"><label>Sexo</label><select class="inp" id="cd-sexo"><option value="">Selecionar</option><option>Masculino</option><option>Feminino</option><option>Não informado</option></select></div>
+      <div class="fg"><label>Data 1ª Admissão</label><input class="inp" type="date" id="cd-adm1"></div>
+      <div class="fg"><label>Data Admissão Atual</label><input class="inp" type="date" id="cd-adm"></div>
+      <div class="fg"><label>Cargo CTPS *</label><input class="inp" id="cd-cargo"></div>
+      <div class="fg"><label>Função Real</label><input class="inp" id="cd-real"></div>
+      <div class="fg"><label>CBO</label><input class="inp" id="cd-cbo" placeholder="Ex: 2521-10"></div>
+      <div class="fg"><label>Departamento</label><select class="inp" id="cd-depto"><option value="">Selecionar</option><option>Administrativo</option><option>Técnico/Manutenção</option><option>Produção/Indústria</option><option>Comercial</option><option>Logística</option><option>Estoque/Almoxarifado</option><option>Contábil</option><option>RH</option><option>Financeiro</option><option>Compras</option><option>Qualidade</option><option>Engenharia</option><option>Segurança do Trabalho</option><option>Jurídico</option><option>TI</option><option>Saúde</option><option>Educação</option><option>Setor Público</option><option>Outros</option></select></div>
+      <div class="fg"><label>Centro de Custo</label><input class="inp" id="cd-cc"></div>
+      <div class="fg"><label>Unidade / Filial</label><input class="inp" id="cd-unidade"></div>
+      <div class="fg"><label>Gestor Imediato</label><input class="inp" id="cd-gestor"></div>
+      <div class="fg"><label>Vínculo</label><select class="inp" id="cd-vinc"><option>CLT</option><option>PJ</option><option>Temporário</option><option>Estagiário</option><option>Aprendiz</option><option>Autônomo</option></select></div>
+      <div class="fg"><label>Jornada</label><select class="inp" id="cd-jornada"><option value="">Selecionar</option><option>44h semanais</option><option>40h semanais</option><option>12x36</option><option>Turno/Escala</option><option>Horista</option></select></div>
+      <div class="fg"><label>Salário Base (R$)</label><input class="inp" type="number" id="cd-sal" step="0.01"></div>
+      <div class="fg"><label>Benefícios</label><input class="inp" id="cd-bene"></div>
+      <div class="fg"><label>Escolaridade</label><select class="inp" id="cd-escol"><option value="">Selecionar</option><option>Fundamental</option><option>Médio</option><option>Técnico</option><option>Superior</option><option>Pós-Graduação</option></select></div>
+      <div class="fg"><label>Situação Atual</label><select class="inp" id="cd-sit"><option>Trabalhando</option><option>Férias</option><option>Afastado</option><option>INSS</option><option>Licença maternidade</option><option>Licença médica</option><option>Desligado</option><option>Suspenso</option><option>Acidente de trabalho</option><option>Transferido</option><option>Treinamento</option><option>Outro</option></select></div>
+      <div class="fg"><label>Qtd. Atestados</label><input class="inp" type="number" id="cd-ates" min="0"></div>
+      <div class="fg"><label>Qtd. Afastamentos</label><input class="inp" type="number" id="cd-afas" min="0"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Observações</label><textarea class="inp" id="cd-obs" rows="2"></textarea></div>
+      <div class="fg" style="grid-column:1/-1">
+        <label>Documentos</label>
+        <label class="btn bh bs" style="cursor:pointer">&#128206; Anexar<input type="file" multiple style="display:none" onchange="addColabDocDet(this)"></label>
+        <div id="colab-det-docs" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem">
+      <button class="btn bh" onclick="closeM('mcolab-det')">Fechar</button>
+      <button class="btn bo bs" onclick="gerarRelColabPDF()">&#11015; PDF</button>
+      <button class="btn bg" onclick="salvarColabDet()">Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="t-ico">&#10003;</span><span id="t-msg">Salvo!</span></div>
 
 <script>
-// PCCS 360 — JavaScript Completo v3.0
-// Uma única passagem, sem injeções, sem duplicatas
+// PCCS 360 v3.1 — JavaScript Enhanced
+// Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
 var K='p36_';
 function gst(k){try{return JSON.parse(localStorage.getItem(K+k))||null}catch(e){return null}}
 function sst(k,v){try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}}
 
 var CORES=['#c9a84c','#3b82f6','#22c55e','#8b5cf6','#ef4444','#f59e0b','#06b6d4','#ec4899'];
-var sessao=null, empAtual=null;
+var sessao=null, empAtual=null, colabDetDocs=[];
 
 var FP=[
-  {n:'Levantamento e Diagnóstico Organizacional',d:'Coleta, análise e mapeamento da situação atual',a:['Reunião de abertura e alinhamento estratégico','Coleta do organograma atual','Levantamento de colaboradores e cargos','Análise da remuneração atual','Identificação de inconsistências e riscos','Entrevistas com líderes','Análise de cultura e clima','Mapeamento de processos-chave','Diagnóstico financeiro da folha','Relatório de diagnóstico inicial']},
-  {n:'Mapeamento e Descrição de Cargos',d:'Identificação e descrição funcional de todos os cargos',a:['Definição da metodologia','Coleta por questionário','Entrevistas para descrição','Redação das descrições','Validação com gestores','Revisão e aprovação','Codificação CBO','Mapeamento de competências','Identificação de lacunas','Aprovação final']},
-  {n:'Avaliação e Classificação de Cargos',d:'Pontuação, classificação e hierarquização',a:['Definição do método de avaliação','Calibração dos fatores','Avaliação técnica dos cargos','Sessão do comitê','Hierarquização e ranking','Definição de graus','Validação com diretoria','Ajustes finais','Elaboração da grade','Divulgação interna']},
-  {n:'Pesquisa Salarial e Viabilidade Financeira',d:'Pesquisa de mercado e análise de competitividade',a:['Definição de fontes','Coleta de dados de mercado','Análise comparativa','Análise de viabilidade','Projeção de impacto','Simulação de cenários','Apresentação à diretoria','Definição do posicionamento','Aprovação','Relatório de pesquisa']},
-  {n:'Estrutura Salarial e Trilhas de Carreira',d:'Criação das faixas salariais e trilhas de desenvolvimento',a:['Definição das famílias','Elaboração das faixas','Amplitude e sobreposição','Trilhas de carreira','Critérios de progressão','Política de mérito','Validação com RH','Aprovação da estrutura','Manual de cargos','Revisão final']},
-  {n:'Governança, Comitê e Regras de Progressão',d:'Estruturação do comitê e fluxos de aprovação',a:['Constituição do comitê','Papéis e responsabilidades','Regulamento interno','Periodicidade de revisão','Política de enquadramento','Regras de promoção','Política de benefícios','Critérios de mérito','Validação jurídica','Aprovação e publicação']},
-  {n:'Implantação, Comunicação e Sustentação',d:'Implementação, comunicação e monitoramento',a:['Plano de comunicação','Treinamento de líderes','Apresentação aos colaboradores','Enquadramento inicial','Registro no sistema','Ajustes pós-implantação','Indicadores de monitoramento','Manual de uso','Avaliação de resultados','Encerramento formal']}
+  {n:'Levantamento e Diagnóstico Organizacional',d:'Coleta, análise e mapeamento da situação atual',a:['Reunião de abertura e alinhamento estratégico','Coleta do organograma atual','Levantamento de colaboradores e cargos','Análise da estrutura de remuneração atual','Identificação de inconsistências e riscos','Entrevistas com líderes e gestores','Análise de cultura e clima organizacional','Mapeamento de processos críticos','Diagnóstico financeiro da folha de pagamento','Relatório de diagnóstico inicial']},
+  {n:'Mapeamento e Descrição de Cargos',d:'Identificação e descrição funcional de todos os cargos',a:['Definição da metodologia de descrição','Coleta de informações por questionário','Entrevistas individuais para descrição','Redação das descrições de cargo','Validação com gestores responsáveis','Revisão e aprovação das descrições','Codificação e classificação CBO','Mapeamento de competências por cargo','Identificação de lacunas de competências','Aprovação final pelo comitê']},
+  {n:'Avaliação e Classificação de Cargos',d:'Pontuação, classificação e hierarquização',a:['Definição do método de avaliação (pontos/Hay)','Calibração dos fatores e pesos','Avaliação técnica de todos os cargos','Sessão do comitê de avaliação','Hierarquização e ranking dos cargos','Definição de graus e classes salariais','Validação com a diretoria','Ajustes e aprovação final','Elaboração da grade de cargos','Divulgação interna da estrutura']},
+  {n:'Pesquisa Salarial e Viabilidade Financeira',d:'Pesquisa de mercado e análise de competitividade',a:['Definição das fontes de pesquisa','Coleta de dados de mercado (P25/P50/P75)','Análise comparativa mercado x empresa','Análise de viabilidade financeira','Projeção do impacto na folha','Simulação de cenários de adequação','Apresentação dos resultados à diretoria','Definição do posicionamento de mercado','Aprovação do posicionamento','Relatório final de pesquisa salarial']},
+  {n:'Estrutura Salarial e Trilhas de Carreira',d:'Criação das faixas salariais e trilhas de desenvolvimento',a:['Definição das famílias de cargos','Elaboração das faixas salariais por nível','Definição de amplitude e sobreposição','Criação das trilhas de carreira','Definição de critérios de progressão','Política de mérito e promoção','Validação com RH e finanças','Aprovação da estrutura salarial','Manual de cargos e salários','Revisão final e aprovação']},
+  {n:'Governança, Comitê e Regras de Progressão',d:'Estruturação do comitê e fluxos de aprovação',a:['Constituição formal do comitê PCCS','Definição de papéis e responsabilidades','Elaboração do regulamento interno','Definição da periodicidade de revisão','Política de enquadramento e equiparação','Regras de admissão e promoção','Política de benefícios vinculada ao PCCS','Definição de critérios de mérito','Validação jurídica das políticas','Aprovação e publicação das diretrizes']},
+  {n:'Implantação, Comunicação e Sustentação',d:'Implementação, comunicação e monitoramento',a:['Plano de comunicação e gestão da mudança','Treinamento de líderes e gestores','Apresentação para os colaboradores','Enquadramento inicial dos colaboradores','Registro no sistema de gestão','Ajustes e correções pós-implantação','Criação de indicadores de monitoramento','Manual de uso do PCCS','Avaliação de resultados (90 dias)','Encerramento formal do projeto']}
 ];
 
-// UTILS
-function cap(s){if(!s)return'';return s.toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase();})}
+var FASE_STATUS=['Não iniciado','Planejado','Em andamento','Pendente','Concluído'];
+
+// ═══ UTILS ═══
+function cap(s){if(!s)return'';return s.toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase()})}
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():''}
 function sv(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt}
 function eh(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -687,10 +765,11 @@ function fmt(v){return v?'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFrac
 function dl(n,c,t){var a=document.createElement('a');var b=new Blob([c],{type:t});a.href=URL.createObjectURL(b);a.download=n;a.click()}
 function toast(msg,ok){var t=document.getElementById('toast');document.getElementById('t-ico').textContent=ok===false?'✕':'✓';document.getElementById('t-msg').textContent=msg;t.style.borderColor=ok===false?'rgba(239,68,68,.3)':'rgba(201,168,76,.3)';t.classList.add('sh');setTimeout(function(){t.classList.remove('sh')},3000)}
 function toggleEye(id,btn){var i=document.getElementById(id);if(!i)return;i.type=i.type==='password'?'text':'password';btn.innerHTML=i.type==='password'?'&#128065;':'&#128584;'}
-function stColor(s){var m={'Concluído':'b bg2','Em andamento':'b by','Atrasado':'b br','Em validação':'b bb','Dependência externa':'b bp','Não iniciado':'b bk','Suspenso':'b bk'};return m[s]||'b bk'}
+function stColor(s){var m={'Concluído':'b bg2','Em andamento':'b by','Atrasado':'b br','Em validação':'b bb','Dependência externa':'b bp','Não iniciado':'b bk','Suspenso':'b bk','Planejado':'b bp','Pendente':'b by','Cancelado':'b br'};return m[s]||'b bk'}
 function toISO(d){if(!d)return'';var s=String(d).trim();var m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return s.substring(0,10);return''}
+function now(){return new Date().toLocaleDateString('pt-BR')}
 
-// INIT
+// ═══ INIT ═══
 function init(){
   if(!gst('users'))sst('users',[{id:'u1',nome:'Ana Kátia',email:'anakatia@institutoprimazia.com.br',senha:'Ana@028079',role:'admin',funcao:'Diretora / Administradora',ini:'AK',cor:'#c9a84c'}]);
   if(!gst('emps'))sst('emps',[]);
@@ -699,11 +778,12 @@ function init(){
   if(!gst('faixas'))sst('faixas',[]);
   if(!gst('membros'))sst('membros',[]);
   if(!gst('rops'))sst('rops',[]);
+  if(!gst('changelog'))sst('changelog',[{id:'cl1',tipo:'Nova Funcionalidade',desc:'Sistema PCCS 360 lançado com Dashboard, Fases, Kanban, Performance, Importação Excel/CSV, IA Organizacional e Relatórios Operacionais.',resp:'Instituto Primazia',data:now(),status:'Implementado'}]);
   var s=gst('sessao');
   if(s){var u=(gst('users')||[]).find(function(x){return x.id===s.id&&x.senha===s.senha});if(u){sessao=u;iniciarApp();return}}
 }
 
-// AUTH
+// ═══ AUTH ═══
 function entrar(){
   var e=gv('le'),s=gv('ls');
   var u=(gst('users')||[]).find(function(x){return x.email===e&&x.senha===s});
@@ -722,17 +802,17 @@ function iniciarApp(){
   nav('vdash')
 }
 
-// NAV
+// ═══ NAV ═══
 function nav(vid){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});
   var el=document.getElementById(vid);if(el)el.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.toggle('on',n.dataset.v===vid)});
-  var renders={vdash:renderDash,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov};
+  var renders={vdash:renderDash,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
   if(renders[vid])renders[vid]();
   window.scrollTo(0,0)
 }
 
-// MODAIS
+// ═══ MODAIS ═══
 function openM(id){
   document.getElementById(id).classList.add('op');
   if(id==='memp')popConsulSel();
@@ -743,32 +823,51 @@ document.querySelectorAll('.ov').forEach(function(o){o.addEventListener('click',
 function popConsulSel(){var sel=document.getElementById('emp-consul');if(!sel)return;var u=gst('users')||[];sel.innerHTML='<option value="">-- Selecionar --</option>';u.forEach(function(x){sel.innerHTML+='<option value="'+eh(x.nome)+'">'+eh(x.nome)+'</option>'})}
 function popEmpSels(){var emps=gst('emps')||[];['c-emp','ps-emp','fx-emp','mb-emp','rop-emp'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">-- Selecionar --</option>';emps.forEach(function(e){el.innerHTML+='<option value="'+e.id+'">'+eh(e.nome)+'</option>'})})}
 
-// EMPRESA CRUD
+// ═══ CHANGELOG ═══
+function renderChangelog(){
+  var logs=gst('changelog')||[];var tbody=document.getElementById('log-tbody');if(!tbody)return;
+  tbody.innerHTML=logs.length?logs.slice().reverse().map(function(l){
+    var sc={'Implementado':'bg2','Em desenvolvimento':'by','Solicitado':'bb','Pendente':'bk'}[l.status]||'bk';
+    return '<tr><td>'+eh(l.data||'-')+'</td><td><span class="b bb" style="font-size:.68rem">'+eh(l.tipo)+'</span></td><td>'+eh(l.desc)+'</td><td>'+eh(l.resp||'-')+'</td><td><span class="b '+sc+'">'+eh(l.status)+'</span></td><td><button class="btn bd bs" onclick="delLog(\''+l.id+'\')">✕</button></td></tr>'
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma alteração registrada.</td></tr>'
+}
+function salvarLog(){
+  var desc=gv('log-desc');if(!desc){toast('Descrição obrigatória.',false);return}
+  var logs=gst('changelog')||[];
+  logs.push({id:'cl'+Date.now(),tipo:gv('log-tipo'),desc:desc,resp:gv('log-resp'),data:gv('log-data')||now(),status:gv('log-status')});
+  sst('changelog',logs);closeM('mlog');
+  ['log-desc','log-resp'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
+  renderChangelog();toast('Alteração registrada!')
+}
+function delLog(id){if(!confirm('Excluir registro?'))return;sst('changelog',(gst('changelog')||[]).filter(function(l){return l.id!==id}));renderChangelog()}
+
+// ═══ EMPRESA CRUD ═══
 var empEditId=null;
 function salvarEmp(){
   var n=gv('emp-nome');if(!n){toast('Nome obrigatório.',false);return}
   var emps=gst('emps')||[];
-  var fases=FP.map(function(f){return{n:f.n,d:f.d,atividades:f.a.map(function(a){return{n:a,feito:false,resp:'',consul:'',ini:'',prev:'',conc:'',st:'Não iniciado',pct:0,obs:'',prior:'Normal'}})}});
+  var fases=FP.map(function(f){return{n:f.n,d:f.d,status:'Não iniciado',atividades:f.a.map(function(a){return{n:a,feito:false,resp:'',consul:'',ini:'',prev:'',conc:'',st:'Não iniciado',pct:0,obs:'',prior:'Normal',anexos:[]}}),anexos:[]}});
   if(empEditId){
     var idx=emps.findIndex(function(e){return e.id===empEditId});
     if(idx>=0){var em=emps[idx];em.nome=cap(n);em.setor=gv('emp-setor');em.lider=gv('emp-lider');em.resp=gv('emp-resp');em.ini=gv('emp-ini');em.fim=gv('emp-fim');em.st=gv('emp-st');em.consul=gv('emp-consul')}
   } else {
-    emps.push({id:'e'+Date.now(),nome:cap(n),setor:gv('emp-setor'),lider:gv('emp-lider'),resp:gv('emp-resp'),ini:gv('emp-ini'),fim:gv('emp-fim'),consul:gv('emp-consul'),st:gv('emp-st'),fases:fases,colabs:[],deptos:[],obs:''})
+    emps.push({id:'e'+Date.now(),nome:cap(n),setor:gv('emp-setor'),lider:gv('emp-lider'),resp:gv('emp-resp'),ini:gv('emp-ini'),fim:gv('emp-fim'),consul:gv('emp-consul'),st:gv('emp-st'),fases:fases,colabs:[],deptos:[],obs:'',anexos:[]})
   }
   sst('emps',emps);closeM('memp');limpaEmpForm();toast('Projeto salvo!');
   if(document.getElementById('vdash').classList.contains('on'))renderDash();
   if(document.getElementById('vemp').classList.contains('on'))renderEmps()
 }
 function limpaEmpForm(){['emp-id','emp-nome','emp-setor','emp-lider','emp-resp','emp-ini','emp-fim'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});empEditId=null}
-function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id});if(!em)return;empEditId=id;['emp-nome','emp-setor','emp-lider','emp-resp','emp-ini','emp-fim'].forEach(function(fid){var e=document.getElementById(fid);if(e)e.value=em[fid.replace('emp-','')]||''});document.getElementById('emp-nome').value=em.nome||'';document.getElementById('emp-st').value=em.st||'Não iniciado';openM('memp');setTimeout(function(){var s=document.getElementById('emp-consul');if(s)s.value=em.consul||''},100)}
+function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id});if(!em)return;empEditId=id;document.getElementById('emp-nome').value=em.nome||'';document.getElementById('emp-setor').value=em.setor||'';document.getElementById('emp-lider').value=em.lider||'';document.getElementById('emp-resp').value=em.resp||'';document.getElementById('emp-ini').value=em.ini||'';document.getElementById('emp-fim').value=em.fim||'';document.getElementById('emp-st').value=em.st||'Não iniciado';openM('memp');setTimeout(function(){var s=document.getElementById('emp-consul');if(s)s.value=em.consul||''},100)}
 function delEmp(id){if(!confirm('Excluir projeto?'))return;sst('emps',(gst('emps')||[]).filter(function(e){return e.id!==id}));toast('Excluído.');renderEmps();if(document.getElementById('vdash').classList.contains('on'))renderDash()}
 
-// PROGRESS UTILS
+// ═══ PROGRESS UTILS ═══
 function calcProg(emp){var t=0,d=0;(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){t++;if(a.feito||a.st==='Concluído')d++})});return t>0?Math.round(d/t*100):0}
-function faseAtual(emp){if(!emp.fases)return'-';for(var i=0;i<emp.fases.length;i++){var f=emp.fases[i];if((f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length<(f.atividades||[]).length)return'F'+(i+1)+': '+f.n.split(' ').slice(0,3).join(' ')+'...'}return'Concluído'}
+function calcFaseProg(fase){var t=(fase.atividades||[]).length,d=(fase.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length;return t>0?Math.round(d/t*100):0}
+function autoFaseStatus(fase){var p=calcFaseProg(fase);if(p===100)fase.status='Concluído';else if(p>0&&fase.status==='Não iniciado')fase.status='Em andamento';return fase}
 
-// DASHBOARD
-function scHtml(v,l,cls){return '<div class="sc '+(cls||'')+'"><div class="sc-n">'+v+'</div><div class="sc-l">'+l+'</div></div>'}//+'"><div class="sc-n">'+v+'</div><div class="sc-l">'+l+'</div></div>'}
+// ═══ DASHBOARD ═══
+function scHtml(v,l,cls){cls=cls||'';return '<div class="sc '+cls+'"><div class="sc-n">'+v+'</div><div class="sc-l">'+l+'</div></div>'}
 function setArc(id,dash,full,off){var e=document.getElementById(id);if(!e)return;e.setAttribute('stroke-dasharray',dash+' '+(full-dash));e.setAttribute('stroke-dashoffset',off||0)}
 function legHtml(c,l,v){return '<div class="li"><div class="ld" style="background:'+c+'"></div>'+l+' ('+v+')</div>'}
 
@@ -789,17 +888,30 @@ function renderDash(){
   document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:2rem">Nenhum projeto.</td></tr>'
 }
 
-// EMPRESAS GRID
+// ═══ EMPRESAS GRID (com separação por status) ═══
 function renderEmps(){
   var emps=gst('emps')||[];var g=document.getElementById('emp-grid');
   if(!emps.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">◈</div><p>Nenhum projeto.</p><button class="btn bg" onclick="openM(\'memp\')">+ Criar Primeiro Projeto</button></div>';return}
+  var grupos={and:[],pend:[],plan:[],conc:[],canc:[],outros:[]};
+  emps.forEach(function(e){
+    if(e.st==='Em andamento')grupos.and.push(e);
+    else if(e.st==='Pendente'||e.st==='Não iniciado')grupos.pend.push(e);
+    else if(e.st==='Planejado')grupos.plan.push(e);
+    else if(e.st==='Concluído')grupos.conc.push(e);
+    else if(e.st==='Cancelado'||e.st==='Suspenso')grupos.canc.push(e);
+    else grupos.outros.push(e);
+  });
   var ce=sessao&&(sessao.role==='admin'||sessao.role==='editor');
-  g.innerHTML=emps.map(function(e){var p=calcProg(e);return '<div class="ec" onclick="abrirEmp(\''+e.id+'\')"><div class="ec-hdr"><div class="ec-ico">◈</div><div class="ec-info"><h4>'+eh(e.nome)+'</h4><p>'+eh(e.setor||'Sem setor')+'</p></div></div><div style="font-size:.72rem;color:var(--t2);margin-bottom:.5rem">'+(e.lider?'◉ '+eh(e.lider)+'&nbsp;&nbsp;':'')+''+(e.ini?fd(e.ini):'')+' → '+(e.fim?fd(e.fim):'')+' </div><div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div><div class="ec-foot"><span class="'+stColor(e.st)+'">'+e.st+'</span><div style="display:flex;gap:.3rem" onclick="event.stopPropagation()">'+(ce?'<button class="btn bh bs" onclick="editEmp(\''+e.id+'\')">✎</button>':'')+' '+(sessao&&sessao.role==='admin'?'<button class="btn bd bs" onclick="delEmp(\''+e.id+'\')">✕</button>':'')+' </div></div></div>'}).join('')
+  function grpSection(title, list, cor){
+    if(!list.length)return'';
+    return '<div style="margin-bottom:1.5rem"><div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+cor+';margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem"><span style="width:20px;height:2px;background:'+cor+';display:inline-block"></span>'+title+' ('+list.length+')</div><div class="ecards">'+list.map(function(e){var p=calcProg(e);return '<div class="ec" onclick="abrirEmp(\''+e.id+'\')"><div class="ec-hdr"><div class="ec-ico">◈</div><div class="ec-info"><h4>'+eh(e.nome)+'</h4><p>'+eh(e.setor||'Sem setor')+'</p></div></div><div style="font-size:.72rem;color:var(--t2);margin-bottom:.5rem">'+(e.lider?'◉ '+eh(e.lider)+'&nbsp;&nbsp;':'')+''+(e.ini?fd(e.ini):'')+' → '+(e.fim?fd(e.fim):'')+' </div><div class="pr"><div class="pb"><div class="pf" style="width:'+p+'%"></div></div><span class="pc">'+p+'%</span></div><div class="ec-foot"><span class="'+stColor(e.st)+'">'+e.st+'</span><div style="display:flex;gap:.3rem" onclick="event.stopPropagation()">'+(ce?'<button class="btn bh bs" onclick="editEmp(\''+e.id+'\')">✎</button>':'')+' '+(sessao&&sessao.role==='admin'?'<button class="btn bd bs" onclick="delEmp(\''+e.id+'\')">✕</button>':'')+' </div></div></div>'}).join('')+'</div></div>'
+  }
+  g.innerHTML=grpSection('Em Andamento',grupos.and,'var(--yw)')+grpSection('Pendente / Não Iniciado',grupos.pend,'var(--t3)')+grpSection('Planejado',grupos.plan,'var(--bl)')+grpSection('Concluídos',grupos.conc,'var(--gr)')+grpSection('Cancelados / Suspensos',grupos.canc,'var(--rd)')+grpSection('Outros',grupos.outros,'var(--t3)')
 }
 
-// EMPRESA DETALHE - TAB SWITCHING
+// ═══ EMPRESA DETALHE ═══
 function tabP(id,btn){
-  ['tp0','tp1','tp2','tp3','tp4','tp5','tp6','tp7','tp8'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});
+  ['tp0','tp1','tp2','tp3','tp4','tp5','tp6','tp7','tp8','tp9'].forEach(function(t){var e=document.getElementById(t);if(e)e.style.display=t===id?'block':'none'});
   document.querySelectorAll('#projeto-tabs .tab').forEach(function(t){t.classList.remove('on')});if(btn)btn.classList.add('on');
   if(!empAtual)return;
   if(id==='tp0')renderVG(empAtual);
@@ -809,7 +921,8 @@ function tabP(id,btn){
   if(id==='tp4')renderColabs(empAtual);
   if(id==='tp5')renderDeptos(empAtual);
   if(id==='tp6')renderIncons(empAtual);
-  if(id==='tp8')renderRops(empAtual)
+  if(id==='tp8')renderRops(empAtual);
+  if(id==='tp9')renderAnexosProj(empAtual)
 }
 
 function abrirEmp(id){
@@ -831,40 +944,152 @@ function renderDetStats(emp){
   if(sEl)sEl.innerHTML='<div class="sk"><div class="sk-n">'+c+'</div><div class="sk-l">Colaboradores</div></div><div class="sk"><div class="sk-n">'+d+'</div><div class="sk-l">Departamentos</div></div><div class="sk"><div class="sk-n '+(ic.length>0?'y':'g')+'">'+ic.length+'</div><div class="sk-l">Inconsistências</div></div><div class="sk"><div class="sk-n '+(ra>0?'r':'g')+'">'+ra+'</div><div class="sk-l">Risco Alto</div></div><div class="sk"><div class="sk-n '+(sc2>0?'r':'g')+'">'+sc2+'</div><div class="sk-l">Sem Cargo</div></div><div class="sk"><div class="sk-n b">'+calcProg(emp)+'%</div><div class="sk-l">Progresso</div></div>'
 }
 
-// VISÃO GERAL
+// ═══ VISÃO GERAL (DASHBOARD EXECUTIVO) ═══
 function renderVG(emp){
   var el=document.getElementById('vg-content');if(!el)return;
   var p=calcProg(emp);var hoje=new Date();
   var prazoOk=emp.fim?new Date(emp.fim)>=hoje:true;
   var diasR=emp.fim?Math.ceil((new Date(emp.fim)-hoje)/(1000*60*60*24)):null;
   var atv=[];(emp.fases||[]).forEach(function(f){(f.atividades||[]).forEach(function(a){atv.push(a)})});
-  var done=atv.filter(function(a){return a.feito||a.st==='Concluido'}).length;
+  var done=atv.filter(function(a){return a.feito||a.st==='Concluído'}).length;
+  var pendentes=atv.filter(function(a){return !a.feito&&a.st!=='Concluído'}).length;
+  var atrasadas=atv.filter(function(a){return a.st==='Atrasado'||(a.prev&&new Date(a.prev)<hoje&&!a.feito)}).length;
   var ic=detectIncons(emp);
+  var fasesConc=(emp.fases||[]).filter(function(f){return calcFaseProg(f)===100}).length;
+  var fasesAnd=(emp.fases||[]).filter(function(f){var pp=calcFaseProg(f);return pp>0&&pp<100}).length;
+
   var meta='';
   if(emp.setor)meta+='<span><strong>'+eh(emp.setor)+'</strong> Setor</span>';
-  if(emp.lider)meta+='<span><strong>'+eh(emp.lider)+'</strong> Lider</span>';
-  if(emp.resp)meta+='<span><strong>'+eh(emp.resp)+'</strong> Responsavel</span>';
+  if(emp.lider)meta+='<span><strong>'+eh(emp.lider)+'</strong> Líder</span>';
+  if(emp.resp)meta+='<span><strong>'+eh(emp.resp)+'</strong> Responsável</span>';
   if(emp.consul)meta+='<span><strong>'+eh(emp.consul)+'</strong> Consultora</span>';
-  if(emp.ini)meta+='<span><strong>'+fd(emp.ini)+'</strong> Inicio</span>';
-  if(emp.fim){var dInfo=diasR!==null?(' ('+Math.abs(diasR)+'d '+(diasR<0?'atrasado':'restantes')+')'):'';meta+='<span><strong style="color:'+(prazoOk?'#fff':'var(--rd)')+'">'+fd(emp.fim)+'</strong> Prazo'+dInfo+'</span>';}
-  var faseProg='';(emp.fases||[]).forEach(function(f,fi){var d=(f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluido'}).length;var t=(f.atividades||[]).length;var pp=t>0?Math.round(d/t*100):0;faseProg+='<div style="margin-bottom:.6rem"><div style="display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:.2rem"><span><strong style="color:var(--gd);margin-right:.4rem">F'+(fi+1)+'</strong>'+eh(f.n)+'</span><span style="color:var(--gd)">'+pp+'%</span></div><div class="pb" style="height:5px"><div class="pf" style="width:'+pp+'%"></div></div></div>'});
-  el.innerHTML='<div class="emp-hdr-info"><h3>'+eh(emp.nome)+'</h3><div class="emp-meta">'+meta+'</div><div class="pr" style="margin-top:.8rem"><div class="pb" style="height:8px"><div class="pf" style="width:'+p+'%"></div></div><span class="pc" style="font-size:1rem">'+p+'%</span></div></div>'+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin-bottom:1rem"><div class="sc"><div class="sc-n">'+(emp.colabs||[]).length+'</div><div class="sc-l">Colaboradores</div></div><div class="sc sg"><div class="sc-n">'+done+'</div><div class="sc-l">Concluidas</div></div><div class="sc '+(ic.length>0?'sy':'sg')+'"><div class="sc-n">'+ic.length+'</div><div class="sc-l">Inconsistencias</div></div></div>'+'<div class="card"><div class="sec-t">Progresso por Fase</div>'+faseProg+'</div>'
+  if(emp.ini)meta+='<span><strong>'+fd(emp.ini)+'</strong> Início</span>';
+  if(emp.fim){var dInfo=diasR!==null?(' — '+Math.abs(diasR)+'d '+(diasR<0?'atrasado':'restantes')):'';meta+='<span><strong style="color:'+(prazoOk?'#fff':'var(--rd)')+'">'+fd(emp.fim)+dInfo+'</strong> Prazo</span>';}
+
+  var faseProg='';(emp.fases||[]).forEach(function(f,fi){
+    var pp=calcFaseProg(f);
+    var autoStatus=pp===100?'Concluído':pp>0?'Em andamento':f.status||'Não iniciado';
+    var stCls=autoStatus==='Concluído'?'bg2':autoStatus==='Em andamento'?'by':'bk';
+    faseProg+='<div style="margin-bottom:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.79rem;margin-bottom:.2rem"><span><strong style="color:var(--gd);margin-right:.4rem">F'+(fi+1)+'</strong>'+eh(f.n)+'</span><div style="display:flex;align-items:center;gap:.4rem"><span class="b b'+stCls+'" style="font-size:.62rem">'+autoStatus+'</span><span style="color:var(--gd);min-width:32px;text-align:right">'+pp+'%</span></div></div><div class="pb" style="height:4px"><div class="pf" style="width:'+pp+'%"></div></div></div>'
+  });
+
+  var kbSummary='';var cols={and:[],conc:[],atrs:[]};
+  atv.forEach(function(a){var s=a.feito||a.st==='Concluído'?'conc':(a.st==='Atrasado'||(a.prev&&new Date(a.prev)<hoje&&!a.feito))?'atrs':'and';cols[s].push(a)});
+  kbSummary='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">';
+  kbSummary+='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--yw)">'+cols.and.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Em Andamento</div></div>';
+  kbSummary+='<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--gr)">'+cols.conc.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Concluídas</div></div>';
+  kbSummary+='<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:var(--r2);padding:.6rem;text-align:center"><div style="font-size:1.3rem;font-weight:700;color:var(--rd)">'+cols.atrs.length+'</div><div style="font-size:.65rem;color:var(--t2);text-transform:uppercase">Atrasadas</div></div>';
+  kbSummary+='</div>';
+
+  el.innerHTML=
+    '<div class="emp-hdr-info" style="margin-bottom:.8rem"><h3>'+eh(emp.nome)+'</h3><div class="emp-meta">'+meta+'</div><div class="pr" style="margin-top:.8rem"><div class="pb" style="height:8px"><div class="pf" style="width:'+p+'%"></div></div><span class="pc" style="font-size:1rem">'+p+'%</span></div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-bottom:1rem">'+
+      '<div class="sc"><div class="sc-n">'+(emp.colabs||[]).length+'</div><div class="sc-l">Colaboradores</div></div>'+
+      '<div class="sc sg"><div class="sc-n">'+fasesConc+'</div><div class="sc-l">Fases Concluídas</div></div>'+
+      '<div class="sc sy"><div class="sc-n">'+fasesAnd+'</div><div class="sc-l">Fases em Andamento</div></div>'+
+      '<div class="sc sg"><div class="sc-n">'+done+'</div><div class="sc-l">Atividades OK</div></div>'+
+      '<div class="sc '+(atrasadas>0?'sr':'sg')+'"><div class="sc-n">'+atrasadas+'</div><div class="sc-l">Atrasadas</div></div>'+
+      '<div class="sc '+(ic.length>0?'sy':'sg')+'"><div class="sc-n">'+ic.length+'</div><div class="sc-l">Inconsistências</div></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">'+
+      '<div class="card"><div class="sec-t">◉ Progresso por Fase</div>'+faseProg+'</div>'+
+      '<div><div class="card" style="margin-bottom:.8rem"><div class="sec-t">◎ Resumo Kanban</div>'+kbSummary+'<button class="btn bh bs" style="margin-top:.7rem;width:100%" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[2].click()">Ver Kanban Completo →</button></div>'+
+      '<div class="card"><div class="sec-t">◐ Ações Rápidas</div><div style="display:flex;flex-direction:column;gap:.4rem">'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[1].click()" style="justify-content:flex-start">◉ Ver Fases do PCCS</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[3].click()" style="justify-content:flex-start">◐ Performance da Equipe</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[4].click()" style="justify-content:flex-start">◑ Colaboradores ('+( emp.colabs||[]).length+')</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[6].click()" style="justify-content:flex-start">◓ Inconsistências ('+ic.length+')</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[7].click()" style="justify-content:flex-start">◔ IA Organizacional</button>'+
+      '</div></div></div>'+
+    '</div>'
 }
+
+// ═══ FASES (MELHORADO COM STATUS POR FASE) ═══
 function renderFases(emp){
   var ehdr=document.getElementById('emp-hdr-info');
   if(ehdr)ehdr.innerHTML='<h3>'+eh(emp.nome)+'</h3><div class="emp-meta"><span><strong>'+eh(emp.setor||'-')+'</strong> Setor</span><span><strong>'+eh(emp.lider||'-')+'</strong> Líder</span><span><strong>'+eh(emp.resp||'-')+'</strong> Responsável</span><span><strong>'+fd(emp.ini||'-')+'</strong> Início</span><span><strong>'+fd(emp.fim||'-')+'</strong> Prazo</span><span><strong>'+calcProg(emp)+'%</strong> Concluído</span></div>';
   var can=sessao&&(sessao.role==='admin'||sessao.role==='editor');
   document.getElementById('fases-list').innerHTML=(emp.fases||[]).map(function(f,fi){
-    var d=(f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length,t=(f.atividades||[]).length,pp=t>0?Math.round(d/t*100):0;
-    var bc=d===t&&t>0?'b bg2':d>0?'b by':'b bk';
-    var aHtml=(f.atividades||[]).map(function(a,ai){var done=a.feito||a.st==='Concluído';return '<div class="atv '+(done?'dn':'')+'" onclick="'+(can?'abrirAtv(\''+emp.id+'\','+fi+','+ai+')':'')+' "><div class="achk">'+(done?'✓':'')+'</div><span class="an">'+eh(a.n)+'</span>'+(a.resp?'<span class="ares">'+eh(a.resp)+'</span>':'')+'</div>'}).join('');
-    var stLbl=d===t&&t>0?'CONCLUÍDA':d>0?'EM ANDAMENTO':'PENDENTE';var stCls=d===t&&t>0?'bg2':d>0?'by':'bk';
-    return '<div class="fase" id="fc'+fi+'"><div class="fhdr" onclick="tgFase('+fi+')"><div class="fnum">'+(fi+1)+'</div><div class="ftit"><h4>'+eh(f.n)+'</h4><p>'+eh(f.d||'')+'</p></div><small style="font-size:.65rem;color:var(--t2);margin-right:.4rem">'+d+'/'+t+' · '+pp+'%</small><span class="b b'+stCls+'" style="margin-right:.5rem;font-size:.65rem">'+stLbl+'</span><span class="fchev">▼</span></div><div class="fbody"><div class="pr" style="margin-bottom:.7rem"><div class="pb"><div class="pf" style="width:'+pp+'%"></div></div><span class="pc">'+pp+'%</span></div>'+aHtml+'</div></div>'
+    var pp=calcFaseProg(f);
+    var autoStatus=pp===100?'Concluído':pp>0?'Em andamento':f.status||'Não iniciado';
+    var stCls=autoStatus==='Concluído'?'bg2':autoStatus==='Em andamento'?'by':'bk';
+    var hoje=new Date();
+    var aHtml=(f.atividades||[]).map(function(a,ai){
+      var done=a.feito||a.st==='Concluído';
+      var atrs=a.prev&&new Date(a.prev)<hoje&&!done;
+      return '<div class="atv '+(done?'dn':'')+'" onclick="'+(can?'abrirAtv(\''+emp.id+'\','+fi+','+ai+')':'')+' ">'+
+        '<div class="achk">'+(done?'✓':'')+'</div>'+
+        '<span class="an">'+eh(a.n)+'</span>'+
+        (a.resp?'<span class="ares">'+eh(a.resp)+'</span>':'')+ 
+        (atrs?'<span class="b br" style="font-size:.62rem;margin-left:.3rem">Atrasado</span>':'')+
+        (a.prev&&!atrs&&!done?'<span style="font-size:.66rem;color:var(--t3);margin-left:.3rem">⏰ '+fd(a.prev)+'</span>':'')+
+      '</div>'
+    }).join('');
+    return '<div class="fase" id="fc'+fi+'">'+
+      '<div class="fhdr" onclick="tgFase('+fi+')">'+
+        '<div class="fnum">'+(fi+1)+'</div>'+
+        '<div class="ftit"><h4>'+eh(f.n)+'</h4><p>'+eh(f.d||'')+'</p></div>'+
+        '<div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">'+
+          (can?'<select class="inp" style="padding:.2rem .5rem;font-size:.68rem;width:110px;border-color:rgba(255,255,255,.1)" onclick="event.stopPropagation()" onchange="mudarFaseStatus(\''+emp.id+'\','+fi+',this.value)">'+FASE_STATUS.map(function(s){return'<option'+(s===autoStatus?' selected':'')+'>'+s+'</option>'}).join('')+'</select>':'<span class="b b'+stCls+'" style="font-size:.65rem">'+autoStatus+'</span>')+
+          '<small style="font-size:.65rem;color:var(--t2)">'+((f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluído'}).length)+'/'+(f.atividades||[]).length+'</small>'+
+          '<span class="b b'+stCls+'" style="font-size:.65rem">'+pp+'%</span>'+
+          '<span class="fchev">▼</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="fbody">'+
+        '<div class="pr" style="margin-bottom:.7rem"><div class="pb"><div class="pf" style="width:'+pp+'%"></div></div><span class="pc">'+pp+'%</span></div>'+
+        (can?'<div style="display:flex;gap:.4rem;margin-bottom:.7rem;flex-wrap:wrap">'+
+          '<label class="btn bh bs" style="cursor:pointer;font-size:.72rem">&#128206; Anexar<input type="file" multiple style="display:none" onchange="addAnexoFase(\''+emp.id+'\','+fi+',this)"></label>'+
+          '<button class="btn bh bs" style="font-size:.72rem" onclick="exportFasePDF(\''+emp.id+'\','+fi+')">⬇ PDF</button>'+
+          '<button class="btn bh bs" style="font-size:.72rem" onclick="exportFaseCSV(\''+emp.id+'\','+fi+')">⬇ CSV</button>'+
+          ((f.anexos&&f.anexos.length)?'<span class="b bk" style="font-size:.65rem">'+f.anexos.length+' anexo(s)</span>':'')+
+        '</div>':'') +
+        '<div>'+aHtml+'</div>'+
+      '</div>'+
+    '</div>'
   }).join('')
 }
 function tgFase(fi){var c=document.getElementById('fc'+fi);if(c)c.classList.toggle('op')}
 
-// ATIVIDADE MODAL
+function mudarFaseStatus(eid,fi,novoSt){
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===eid});if(idx<0)return;
+  emps[idx].fases[fi].status=novoSt;
+  sst('emps',emps);empAtual=emps[idx];toast('Status da fase atualizado!')
+}
+
+// ═══ ANEXOS POR FASE ═══
+function addAnexoFase(eid,fi,input){
+  if(!input.files.length)return;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===eid});if(idx<0)return;
+  if(!emps[idx].fases[fi].anexos)emps[idx].fases[fi].anexos=[];
+  Array.from(input.files).forEach(function(f){emps[idx].fases[fi].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
+  sst('emps',emps);empAtual=emps[idx];renderFases(empAtual);toast('Arquivo(s) anexado(s)!')
+}
+
+// ═══ EXPORT FASE ═══
+function exportFasePDF(eid,fi){
+  var emps=gst('emps')||[];var emp=emps.find(function(e){return e.id===eid});if(!emp)return;
+  var f=emp.fases[fi];
+  var w=window.open('','_blank');
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+f.n+'</title>';
+  s+='<style>body{font-family:Arial,sans-serif;padding:2rem;color:#111}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}h2{color:#c9a84c;font-size:1rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.4rem .8rem;text-align:left;font-size:.85rem}td{padding:.4rem .8rem;border-bottom:1px solid #eee;font-size:.85rem}.ok{color:green}.nd{color:#999}</style>';
+  s+='</head><body><h1>PCCS 360 · Instituto Primazia</h1>';
+  s+='<h2>'+eh(emp.nome)+' · Fase '+(fi+1)+': '+eh(f.n)+'</h2>';
+  s+='<p>Progresso: '+calcFaseProg(f)+'% | Gerado: '+now()+'</p>';
+  s+='<table><tr><th>Atividade</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>%</th></tr>';
+  (f.atividades||[]).forEach(function(a){s+='<tr><td class="'+(a.feito||a.st==='Concluído'?'ok':'nd')+'">'+eh(a.n)+'</td><td>'+eh(a.resp||'-')+'</td><td>'+( a.prev?fd(a.prev):'-')+'</td><td>'+eh(a.st||'Não iniciado')+'</td><td>'+(a.feito||a.st==='Concluído'?'100':a.pct||0)+'%</td></tr>'});
+  s+='</table></body></html>';
+  w.document.write(s);w.document.close();w.print()
+}
+function exportFaseCSV(eid,fi){
+  var emps=gst('emps')||[];var emp=emps.find(function(e){return e.id===eid});if(!emp)return;
+  var f=emp.fases[fi];
+  var csv='Atividade,Responsável,Prazo,Status,%\n';
+  (f.atividades||[]).forEach(function(a){csv+='"'+eh(a.n)+'","'+(a.resp||'')+'","'+(a.prev?fd(a.prev):'')+'",'+(a.st||'Não iniciado')+','+(a.feito||a.st==='Concluído'?100:a.pct||0)+'\n'});
+  dl('fase_'+(fi+1)+'_'+emp.nome+'.csv',csv,'text/csv');toast('CSV exportado!')
+}
+
+// ═══ ATIVIDADE MODAL ═══
 function abrirAtv(eid,fi,ai){
   var em=(gst('emps')||[]).find(function(e){return e.id===eid});if(!em)return;
   var a=em.fases[fi].atividades[ai];
@@ -882,11 +1107,13 @@ function salvarAtv(){
   var a=emps[idx].fases[fi].atividades[ai];
   a.resp=gv('a-resp');a.consul=gv('a-consul');a.ini=gv('a-ini');a.prev=gv('a-prev');a.conc=gv('a-conc');
   a.st=gv('a-st');a.pct=parseInt(gv('a-pct'))||0;a.prior=gv('a-prior');a.obs=gv('a-obs');
-  if(a.st==='Concluído')a.feito=true;else if(a.st==='Não iniciado')a.feito=false;
+  if(a.st==='Concluído'){a.feito=true;a.pct=100;if(!a.conc)a.conc=new Date().toISOString().split('T')[0]}else if(a.st==='Não iniciado')a.feito=false;
+  // Auto-update fase status
+  emps[idx].fases[fi]=autoFaseStatus(emps[idx].fases[fi]);
   sst('emps',emps);empAtual=emps[idx];closeM('matv');renderFases(empAtual);renderDetStats(empAtual);toast('Atividade salva!')
 }
 
-// KANBAN PER-PROJECT
+// ═══ KANBAN PER-PROJECT ═══
 function renderKanban(emp){
   var all=[];(emp.fases||[]).forEach(function(f,fi){(f.atividades||[]).forEach(function(a,ai){all.push({fi:fi,ai:ai,f:'F'+(fi+1),n:a.n,resp:a.resp,consul:a.consul,prior:a.prior||'Normal',st:a.st||'Em andamento',pct:a.pct||0,prev:a.prev,feito:a.feito})})});
   var hoje=new Date();
@@ -903,7 +1130,7 @@ function renderKanban(emp){
   }).join('')
 }
 
-// PERFORMANCE PER-PROJECT
+// ═══ PERFORMANCE PER-PROJECT ═══
 function renderPerf(emp){
   var all=[];(emp.fases||[]).forEach(function(f,fi){(f.atividades||[]).forEach(function(a,ai){all.push({fi:fi,ai:ai,f:'F'+(fi+1),n:a.n,resp:a.resp,consul:a.consul,st:a.st||'Em andamento',pct:a.pct||0,prev:a.prev,feito:a.feito})})});
   var hoje=new Date();var tot=all.length,done=0,atras=0,pend=0;
@@ -916,7 +1143,7 @@ function renderPerf(emp){
   var pt=document.getElementById('perf-tbody');if(pt)pt.innerHTML=all.map(function(a){var done2=a.feito||a.st==='Concluído';var atrs2=a.prev&&new Date(a.prev)<hoje&&!done2;return '<tr><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+eh(a.n)+'</td><td><span class="b bk" style="font-size:.65rem">'+a.f+'</span></td><td>'+eh(a.resp||'—')+'</td><td>'+(a.prev?'<span style="color:'+(atrs2?'var(--rd)':'inherit')+'">'+fd(a.prev)+'</span>':'—')+'</td><td><span class="'+stColor(a.st)+'">'+a.st+'</span></td><td>'+(done2?100:a.pct||0)+'%</td><td><span class="b '+(atrs2?'br':done2?'bg2':'bk')+'" style="font-size:.65rem">'+(atrs2?'Atrasado':done2?'No prazo':'—')+'</span></td></tr>'}).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:1.5rem">Nenhuma atividade.</td></tr>'
 }
 
-// COLABORADORES
+// ═══ COLABORADORES ═══
 function renderColabs(emp){
   var tbody=document.getElementById('colabs-tbody');if(!tbody)return;
   var list=emp.colabs||[];
@@ -928,7 +1155,7 @@ function renderColabs(emp){
   if(fSit)list=list.filter(function(c){return c.sit===fSit});
   var allC=emp.colabs||[];var deptos=[...new Set(allC.map(function(c){return c.depto}).filter(Boolean))].sort();
   var fd2=document.getElementById('fil-depto');if(fd2){var cv=fd2.value;fd2.innerHTML='<option value="">Todos os departamentos</option>';deptos.forEach(function(d){fd2.innerHTML+='<option'+(cv===d?' selected':'')+'>'+eh(d)+'</option>'})}
-  tbody.innerHTML=list.length?list.map(function(c,i){var sc=c.sit==='Trabalhando'||c.sit==='Home office'?'bg2':c.sit==='Desligado'?'br':c.sit==='Férias'?'bb':'by';return '<tr><td style="font-weight:600">'+eh(c.nome||'-')+'</td><td style="font-size:.75rem;color:var(--t3)">'+eh(c.cpf||'-')+'</td><td>'+eh(c.cargo||'-')+'</td><td style="color:var(--t2)">'+eh(c.real||c.cargo||'-')+'</td><td>'+eh(c.depto||'-')+'</td><td style="font-weight:600;color:var(--gd)">'+(c.sal?fmt(c.sal):'-')+'</td><td><span class="b '+sc+'">'+eh(c.sit||'-')+'</span></td><td><button class="btn bd bs" onclick="delColab('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:2rem">Nenhum colaborador. Importe ou cadastre manualmente.</td></tr>'
+  tbody.innerHTML=list.length?list.map(function(c,i){var sc=c.sit==='Trabalhando'||c.sit==='Home office'?'bg2':c.sit==='Desligado'?'br':c.sit==='Férias'?'bb':'by';return '<tr><td style="font-weight:600">'+eh(c.nome||'-')+'</td><td style="font-size:.75rem;color:var(--t3)">'+eh(c.cpf||'-')+'</td><td>'+eh(c.cargo||'-')+'</td><td style="color:var(--t2)">'+eh(c.real||c.cargo||'-')+'</td><td>'+eh(c.depto||'-')+'</td><td style="font-weight:600;color:var(--gd)">'+(c.sal?fmt(c.sal):'-')+'</td><td><span class="b '+sc+'">'+eh(c.sit||'-')+'</span></td><td><div style="display:flex;gap:.25rem"><button class="btn bh bs" onclick="verColabDet('+i+')" title="Ver Cadastro">&#128065;</button><button class="btn bd bs" onclick="delColab('+i+')">✕</button></div></td></tr>'}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:2rem">Nenhum colaborador. Importe ou cadastre manualmente.</td></tr>'
 }
 
 function filtrarColabs(){if(empAtual)renderColabs(empAtual)}
@@ -939,23 +1166,81 @@ function salvarColab(){
   if(!n){err.textContent='Nome obrigatório.';return}err.textContent='';
   var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
   if(!emps[idx].colabs)emps[idx].colabs=[];
-  emps[idx].colabs.push({nome:cap(n),cpf:gv('cl-cpf'),sexo:gv('cl-sexo'),nasc:gv('cl-nasc'),adm1:gv('cl-adm1'),adm:gv('cl-adm'),cargo:cap(gv('cl-cargo')),real:cap(gv('cl-real')),depto:gv('cl-depto'),cc:gv('cl-cc'),gestor:cap(gv('cl-gestor')),unidade:cap(gv('cl-unidade')),vinc:gv('cl-vinc'),jornada:gv('cl-jornada'),sal:gv('cl-sal'),escol:gv('cl-escol'),bene:gv('cl-bene'),sit:gv('cl-sit')||'Trabalhando',obs:gv('cl-obs')});
+  emps[idx].colabs.push({nome:cap(n),cpf:gv('cl-cpf'),sexo:gv('cl-sexo'),nasc:gv('cl-nasc'),adm1:gv('cl-adm1'),adm:gv('cl-adm'),cargo:cap(gv('cl-cargo')),real:cap(gv('cl-real')),depto:gv('cl-depto'),cc:gv('cl-cc'),gestor:cap(gv('cl-gestor')),unidade:cap(gv('cl-unidade')),vinc:gv('cl-vinc'),jornada:gv('cl-jornada'),sal:gv('cl-sal'),escol:gv('cl-escol'),bene:gv('cl-bene'),sit:gv('cl-sit')||'Trabalhando',obs:gv('cl-obs'),docs:[],cbo:''});
   sst('emps',emps);empAtual=emps[idx];closeM('mcolab');renderColabs(empAtual);renderDetStats(empAtual);toast('Colaborador salvo!');
   ['cl-nome','cl-cpf','cl-nasc','cl-adm1','cl-adm','cl-cargo','cl-real','cl-cc','cl-gestor','cl-unidade','cl-bene','cl-obs'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''})
 }
 
 function delColab(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].colabs.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual)}
 
+// ═══ VER CADASTRO DO COLABORADOR ═══
+function verColabDet(i){
+  if(!empAtual)return;
+  var c=(empAtual.colabs||[])[i];if(!c)return;
+  document.getElementById('colab-det-idx').value=i;
+  document.getElementById('colab-det-titulo').textContent='◕ '+eh(c.nome||'Colaborador');
+  colabDetDocs=c.docs||[];
+  var set=function(id,val){var e=document.getElementById(id);if(e)e.value=val||''};
+  set('cd-nome',c.nome);set('cd-cpf',c.cpf);set('cd-nasc',toISO(c.nasc));set('cd-adm1',toISO(c.adm1));set('cd-adm',toISO(c.adm));
+  set('cd-cargo',c.cargo);set('cd-real',c.real);set('cd-cbo',c.cbo);set('cd-cc',c.cc);
+  set('cd-gestor',c.gestor);set('cd-unidade',c.unidade);set('cd-sal',c.sal);set('cd-bene',c.bene);set('cd-obs',c.obs);
+  set('cd-ates',c.ates);set('cd-afas',c.afas);
+  var sels={sexo:'cd-sexo',depto:'cd-depto',vinc:'cd-vinc',jornada:'cd-jornada',escol:'cd-escol',sit:'cd-sit'};
+  Object.keys(sels).forEach(function(k){var e=document.getElementById(sels[k]);if(e)e.value=c[k]||''});
+  renderColabDetDocs();
+  openM('mcolab-det')
+}
+
+function renderColabDetDocs(){
+  var el=document.getElementById('colab-det-docs');if(!el)return;
+  el.innerHTML=colabDetDocs.map(function(d,i){return '<div class="parti-chip">📎 '+eh(d.nome)+'<button onclick="colabDetDocs.splice('+i+',1);renderColabDetDocs()">✕</button></div>'}).join('')
+}
+
+function addColabDocDet(input){
+  Array.from(input.files).forEach(function(f){colabDetDocs.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
+  renderColabDetDocs()
+}
+
+function salvarColabDet(){
+  if(!empAtual)return;
+  var i=parseInt(document.getElementById('colab-det-idx').value);
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  var c=emps[idx].colabs[i];if(!c)return;
+  var gv2=function(id){var e=document.getElementById(id);return e?e.value.trim():''};
+  c.nome=cap(gv2('cd-nome'));c.cpf=gv2('cd-cpf');c.sexo=gv2('cd-sexo');c.nasc=gv2('cd-nasc');c.adm1=gv2('cd-adm1');c.adm=gv2('cd-adm');
+  c.cargo=cap(gv2('cd-cargo'));c.real=cap(gv2('cd-real'));c.cbo=gv2('cd-cbo');c.depto=gv2('cd-depto');c.cc=gv2('cd-cc');
+  c.gestor=cap(gv2('cd-gestor'));c.unidade=cap(gv2('cd-unidade'));c.vinc=gv2('cd-vinc');c.jornada=gv2('cd-jornada');
+  c.sal=gv2('cd-sal');c.escol=gv2('cd-escol');c.bene=gv2('cd-bene');c.sit=gv2('cd-sit');c.ates=gv2('cd-ates');c.afas=gv2('cd-afas');
+  c.obs=gv2('cd-obs');c.docs=colabDetDocs.slice();
+  sst('emps',emps);empAtual=emps[idx];closeM('mcolab-det');renderColabs(empAtual);toast('Cadastro atualizado!')
+}
+
+function gerarRelColabPDF(){
+  var i=parseInt(document.getElementById('colab-det-idx').value);
+  var c=(empAtual&&empAtual.colabs)?empAtual.colabs[i]:null;if(!c)return;
+  var w=window.open('','_blank');
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+c.nome+'</title><style>body{font-family:Arial,sans-serif;padding:2rem;background:#fff}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}h2{color:#c9a84c;font-size:.9rem;margin:1rem 0 .3rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem}.field{margin-bottom:.5rem}.label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block}.val{font-size:.9rem;color:#111}</style></head><body>';
+  s+='<h1>PCCS 360 · Ficha do Colaborador</h1>';
+  s+='<h2>Dados Pessoais</h2><div class="grid">';
+  var fields=[['Nome',c.nome],['CPF',c.cpf],['Sexo',c.sexo],['Nascimento',c.nasc?fd(c.nasc):''],['1ª Admissão',c.adm1?fd(c.adm1):''],['Admissão Atual',c.adm?fd(c.adm):'']];
+  fields.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div><h2>Dados Funcionais</h2><div class="grid">';
+  var fields2=[['Cargo CTPS',c.cargo],['Função Real',c.real],['CBO',c.cbo],['Departamento',c.depto],['Centro Custo',c.cc],['Gestor',c.gestor],['Unidade',c.unidade],['Vínculo',c.vinc],['Jornada',c.jornada],['Salário Base',c.sal?fmt(c.sal):''],['Escolaridade',c.escol],['Situação',c.sit],['Benefícios',c.bene]];
+  fields2.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div></body></html>';
+  w.document.write(s);w.document.close();w.print()
+}
+
 function exportColabs(){
   if(!empAtual)return;
-  var h='Nome,CPF,Sexo,Nascimento,Admissão,Cargo CTPS,Função Real,Departamento,Centro Custo,Salário,Situação\n';
-  var csv=h+(empAtual.colabs||[]).map(function(c){return '"'+(c.nome||'')+'","'+(c.cpf||'')+'","'+(c.sexo||'')+'","'+(c.nasc?fd(c.nasc):'')+'","'+(c.adm?fd(c.adm):'')+'","'+(c.cargo||'')+'","'+(c.real||'')+'","'+(c.depto||'')+'","'+(c.cc||'')+'","'+(c.sal||'')+'","'+(c.sit||'')+'"'}).join('\n');
+  var h='Nome,CPF,Sexo,Nascimento,Admissão,Cargo CTPS,Função Real,CBO,Departamento,Centro Custo,Salário,Situação\n';
+  var csv=h+(empAtual.colabs||[]).map(function(c){return '"'+(c.nome||'')+'","'+(c.cpf||'')+'","'+(c.sexo||'')+'","'+(c.nasc?fd(c.nasc):'')+'","'+(c.adm?fd(c.adm):'')+'","'+(c.cargo||'')+'","'+(c.real||'')+'","'+(c.cbo||'')+'","'+(c.depto||'')+'","'+(c.cc||'')+'","'+(c.sal||'')+'","'+(c.sit||'')+'"'}).join('\n');
   dl('colaboradores_'+empAtual.nome+'.csv',csv,'text/csv');toast('CSV exportado!')
 }
 
-// IMPORTAÇÃO EXCEL/CSV
+// ═══ IMPORTAÇÃO ═══
 function mapCols(headers){
-  var MAP={nome:['nome','name','nome completo','colaborador','funcionario','empregado'],cpf:['cpf','cpf/mf'],cargo:['cargo','cargo ctps','cargo formal'],real:['função real','funcao real','função','cargo real','atividade'],depto:['departamento','setor','area','área','lotação'],cc:['centro de custo','cc','cdc'],gestor:['gestor','gestor imediato','lider','supervisor'],unidade:['unidade','filial','local'],vinc:['vínculo','vinculo','contrato'],jornada:['jornada','carga horária'],sal:['salário','salario','remuneração','salário base'],sit:['situação','situacao','status'],bene:['benefícios','beneficios'],adm:['admissão','admissao','data admissão'],nasc:['nascimento','data nascimento']};
+  var MAP={nome:['nome','name','nome completo','colaborador','funcionario','empregado'],cpf:['cpf','cpf/mf'],cargo:['cargo','cargo ctps','cargo formal'],real:['função real','funcao real','função','cargo real'],depto:['departamento','setor','area'],cc:['centro de custo','cc'],gestor:['gestor','lider','supervisor'],unidade:['unidade','filial'],vinc:['vínculo','vinculo','contrato'],jornada:['jornada','carga horária'],sal:['salário','salario','remuneração','salário base'],sit:['situação','situacao','status'],bene:['benefícios','beneficios'],adm:['admissão','admissao','data admissão'],nasc:['nascimento','data nascimento'],cbo:['cbo']};
   var r={};
   headers.forEach(function(h,i){var hl=h.toLowerCase().trim().replace(/['"]/g,'');Object.keys(MAP).forEach(function(field){if(r[field]===undefined)MAP[field].forEach(function(kw){if(hl.includes(kw)||kw.includes(hl))r[field]=i})})});
   return r
@@ -969,7 +1254,7 @@ function processRows(rows,colMap){
     var n=colMap.nome!==undefined?cap((row[colMap.nome]||'').toString().trim()):'';if(!n)return;
     var cpf=(colMap.cpf!==undefined?(row[colMap.cpf]||'').toString().trim():'').replace(/\D/g,'');
     if(cpf&&seen[cpf])return;if(cpf)seen[cpf]=true;
-    cols.push({nome:n,cpf:cpf?cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):'',cargo:cap((colMap.cargo!==undefined?(row[colMap.cargo]||'').toString().trim():'')),real:cap((colMap.real!==undefined?(row[colMap.real]||'').toString().trim():'')),depto:cap((colMap.depto!==undefined?(row[colMap.depto]||'').toString().trim():'')),cc:(colMap.cc!==undefined?(row[colMap.cc]||'').toString().trim():''),gestor:cap((colMap.gestor!==undefined?(row[colMap.gestor]||'').toString().trim():'')),unidade:cap((colMap.unidade!==undefined?(row[colMap.unidade]||'').toString().trim():'')),vinc:(colMap.vinc!==undefined?(row[colMap.vinc]||'').toString().trim():'')||'CLT',jornada:(colMap.jornada!==undefined?(row[colMap.jornada]||'').toString().trim():''),sal:parseSal(colMap.sal!==undefined?row[colMap.sal]:''),sit:cap((colMap.sit!==undefined?(row[colMap.sit]||'').toString().trim():'')||'Trabalhando')||'Trabalhando',bene:(colMap.bene!==undefined?(row[colMap.bene]||'').toString().trim():''),adm:parseD(colMap.adm!==undefined?row[colMap.adm]:''),nasc:parseD(colMap.nasc!==undefined?row[colMap.nasc]:'')})
+    cols.push({nome:n,cpf:cpf?cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):'',cargo:cap((colMap.cargo!==undefined?(row[colMap.cargo]||'').toString().trim():'')),real:cap((colMap.real!==undefined?(row[colMap.real]||'').toString().trim():'')),depto:cap((colMap.depto!==undefined?(row[colMap.depto]||'').toString().trim():'')),cc:(colMap.cc!==undefined?(row[colMap.cc]||'').toString().trim():''),gestor:cap((colMap.gestor!==undefined?(row[colMap.gestor]||'').toString().trim():'')),unidade:cap((colMap.unidade!==undefined?(row[colMap.unidade]||'').toString().trim():'')),vinc:(colMap.vinc!==undefined?(row[colMap.vinc]||'').toString().trim():'')||'CLT',jornada:(colMap.jornada!==undefined?(row[colMap.jornada]||'').toString().trim():''),sal:parseSal(colMap.sal!==undefined?row[colMap.sal]:''),sit:cap((colMap.sit!==undefined?(row[colMap.sit]||'').toString().trim():'')||'Trabalhando')||'Trabalhando',bene:(colMap.bene!==undefined?(row[colMap.bene]||'').toString().trim():''),adm:parseD(colMap.adm!==undefined?row[colMap.adm]:''),nasc:parseD(colMap.nasc!==undefined?row[colMap.nasc]:''),cbo:(colMap.cbo!==undefined?(row[colMap.cbo]||'').toString().trim():''),docs:[]})
   });return cols
 }
 function finalizarImport(rows,colMap){
@@ -985,14 +1270,14 @@ function importColabs(input){
   if(!empAtual||!input.files[0])return;
   var file=input.files[0];var fname=file.name.toLowerCase();var reader=new FileReader();
   if(fname.endsWith('.csv')){
-    reader.onload=function(e){try{var text=e.target.result;if(/[\x00-\x08]/.test(text.substring(0,200))){toast('Arquivo inválido. Use CSV UTF-8.',false);return}var line1=text.split('\n')[0];var sep=line1.includes(';')?';':line1.includes('\t')?'\t':',';var lines=text.split('\n');var hdr=lines[0].split(sep).map(function(h){return h.trim().replace(/^["']|["']$/g,'')});var rows=[];for(var i=1;i<lines.length;i++){if(!lines[i].trim())continue;rows.push(lines[i].split(sep).map(function(v){return v.trim().replace(/^["']|["']$/g,'')}))}finalizarImport(rows,mapCols(hdr))}catch(ex){toast('Erro: '+ex.message,false)}};reader.readAsText(file,'UTF-8')
+    reader.onload=function(e){try{var text=e.target.result;if(/[\x00-\x08]/.test(text.substring(0,200))){toast('Arquivo inválido.',false);return}var line1=text.split('\n')[0];var sep=line1.includes(';')?';':line1.includes('\t')?'\t':',';var lines=text.split('\n');var hdr=lines[0].split(sep).map(function(h){return h.trim().replace(/^["']|["']$/g,'')});var rows=[];for(var i=1;i<lines.length;i++){if(!lines[i].trim())continue;rows.push(lines[i].split(sep).map(function(v){return v.trim().replace(/^["']|["']$/g,'')}))}finalizarImport(rows,mapCols(hdr))}catch(ex){toast('Erro: '+ex.message,false)}};reader.readAsText(file,'UTF-8')
   }else if(fname.endsWith('.xlsx')||fname.endsWith('.xls')){
-    reader.onload=function(e){try{if(typeof XLSX==='undefined'){toast('Biblioteca Excel carregando... tente novamente em 2s.',false);return}var data=new Uint8Array(e.target.result);var wb=XLSX.read(data,{type:'array',cellDates:true});var ws=wb.Sheets[wb.SheetNames[0]];var json=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd'});if(!json||json.length<2){toast('Planilha vazia.',false);return}finalizarImport(json.slice(1),mapCols(json[0].map(function(h){return(h||'').toString().trim()})))}catch(ex){toast('Erro Excel: '+ex.message,false)}};reader.readAsArrayBuffer(file)
+    reader.onload=function(e){try{if(typeof XLSX==='undefined'){toast('Biblioteca carregando... tente novamente.',false);return}var data=new Uint8Array(e.target.result);var wb=XLSX.read(data,{type:'array',cellDates:true});var ws=wb.Sheets[wb.SheetNames[0]];var json=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd'});if(!json||json.length<2){toast('Planilha vazia.',false);return}finalizarImport(json.slice(1),mapCols(json[0].map(function(h){return(h||'').toString().trim()})))}catch(ex){toast('Erro Excel: '+ex.message,false)}};reader.readAsArrayBuffer(file)
   }else{toast('Use CSV, XLS ou XLSX.',false)}
   input.value=''
 }
 
-// DEPARTAMENTOS
+// ═══ DEPARTAMENTOS ═══
 function renderDeptos(emp){
   var t=document.getElementById('deptos-tbody');if(!t)return;
   var list=emp.deptos||[];
@@ -1001,7 +1286,7 @@ function renderDeptos(emp){
 function salvarDepto(){if(!empAtual)return;var n=gv('d-nome');if(!n){toast('Nome obrigatório.',false);return}var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].deptos)emps[idx].deptos=[];emps[idx].deptos.push({nome:cap(n),resp:gv('d-resp')});sst('emps',emps);empAtual=emps[idx];closeM('mdepto');renderDeptos(empAtual);renderDetStats(empAtual);toast('Departamento salvo!');document.getElementById('d-nome').value='';document.getElementById('d-resp').value=''}
 function delDepto(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].deptos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderDeptos(empAtual);renderDetStats(empAtual)}
 
-// INCONSISTÊNCIAS
+// ═══ INCONSISTÊNCIAS ═══
 function detectIncons(emp){
   var ic=[];
   (emp.colabs||[]).forEach(function(c,i){
@@ -1020,7 +1305,7 @@ function renderIncons(emp){
   el.innerHTML=list.map(function(ic){var cls=ic.nivel==='Alto'?'br':ic.nivel==='Médio'?'by':'bk';return '<div style="background:var(--nv2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem"><span class="b '+cls+'">'+ic.nivel+'</span><div style="flex:1"><div style="font-size:.84rem;font-weight:600">'+eh(ic.n)+'</div><div style="font-size:.75rem;color:var(--t2)">'+ic.tipo+'</div></div><div style="font-size:.72rem;color:var(--gd)">'+ic.sug+'</div></div>'}).join('')
 }
 
-// IA ORGANIZACIONAL
+// ═══ IA ═══
 function rodarIA(){
   if(!empAtual){toast('Abra um projeto primeiro.',false);return}
   var colabs=empAtual.colabs||[];var ic=detectIncons(empAtual);
@@ -1029,13 +1314,12 @@ function rodarIA(){
   var ef=atv.length>0?Math.round(done/atv.length*100):0;
   var sc2=colabs.filter(function(c){return!c.cargo&&!c.real}).length;
   var txt='<p><strong>◈ Diagnóstico: '+eh(empAtual.nome)+'</strong></p>';
-  txt+='<p>Progresso: <strong>'+calcProg(empAtual)+'%</strong> · Eficiência operacional: <strong>'+ef+'%</strong></p>';
-  if(ic.length>0){var ra=ic.filter(function(i){return i.nivel==='Alto'}).length;txt+='<p style="color:'+(ra>0?'var(--rd)':'var(--yw)')+'"><strong>'+(ra>0?'🔴':'🟡')+' Inconsistências:</strong> '+ic.length+' encontradas ('+ra+' risco alto).</p>'}
-  if(sc2>0)txt+='<p style="color:var(--yw)"><strong>⚠ Risco trabalhista:</strong> '+sc2+' colaborador(es) sem cargo — regularize antes da estrutura salarial.</p>';
-  if(ef<50)txt+='<p style="color:var(--rd)"><strong>🔴 Performance crítica:</strong> Eficiência abaixo de 50%. Revisar cronograma com urgência.</p>';
-  else if(ef<80)txt+='<p style="color:var(--yw)"><strong>🟡 Performance moderada:</strong> Monitorar fases com maior atraso.</p>';
-  else txt+='<p style="color:var(--gr)"><strong>🟢 Performance adequada!</strong> Projeto dentro da eficiência esperada.</p>';
-  txt+='<p style="margin-top:.6rem"><strong>◎ Recomendações:</strong> '+(ic.length>0?'Resolver inconsistências antes de avançar para estrutura salarial.':'Estrutura organizacional sem inconsistências críticas.')+'</p>';
+  txt+='<p>Progresso: <strong>'+calcProg(empAtual)+'%</strong> · Eficiência: <strong>'+ef+'%</strong></p>';
+  if(ic.length>0){var ra=ic.filter(function(i){return i.nivel==='Alto'}).length;txt+='<p style="color:'+(ra>0?'var(--rd)':'var(--yw)')+'"><strong>'+(ra>0?'🔴':'🟡')+' Inconsistências:</strong> '+ic.length+' ('+ra+' alto risco).</p>'}
+  if(sc2>0)txt+='<p style="color:var(--yw)"><strong>⚠ Risco trabalhista:</strong> '+sc2+' sem cargo — regularize antes da estrutura salarial.</p>';
+  if(ef<50)txt+='<p style="color:var(--rd)"><strong>🔴 Performance crítica.</strong> Revisar cronograma urgente.</p>';
+  else if(ef<80)txt+='<p style="color:var(--yw)"><strong>🟡 Performance moderada.</strong> Monitorar fases críticas.</p>';
+  else txt+='<p style="color:var(--gr)"><strong>🟢 Performance adequada!</strong></p>';
   var res=document.getElementById('ia-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
   var em=document.getElementById('ia-empty');if(em)em.style.display='none'
 }
@@ -1045,16 +1329,17 @@ function rodarIACBO(){
   var ad=0,pa=0,ic=0;var det='';
   colabs.slice(0,15).forEach(function(c){
     if(!c.cargo&&!c.real){ic++;det+='<p style="color:var(--rd)">🔴 <strong>'+eh(c.nome)+'</strong>: Sem cargo — CBO não verificável.</p>'}
-    else if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8){pa++;det+='<p style="color:var(--yw)">🟡 <strong>'+eh(c.nome)+'</strong>: "'+eh(c.cargo)+'" ≠ "'+eh(c.real)+'" — Verificar desvio de função.</p>'}
-    else{ad++;det+='<p style="color:var(--gr)">🟢 <strong>'+eh(c.nome||'-')+'</strong>: Aparentemente alinhado.</p>'}
+    else if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8){pa++;det+='<p style="color:var(--yw)">🟡 <strong>'+eh(c.nome)+'</strong>: "'+eh(c.cargo)+'" ≠ "'+eh(c.real)+'" — Verificar desvio.</p>'}
+    else{ad++;det+='<p style="color:var(--gr)">🟢 <strong>'+eh(c.nome||'-')+'</strong>: Alinhado.</p>'}
   });
-  var txt='<p><strong>◉ Análise CBO — '+eh(empAtual.nome)+'</strong></p><p>'+colabs.length+' colaboradores'+(colabs.length>15?' (exibindo primeiros 15)':'')+'</p>';
-  txt+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.7rem 0"><div style="background:rgba(34,197,94,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--gr)">'+ad+'</div><div style="font-size:.68rem;color:var(--t2)">Aderentes</div></div><div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--yw)">'+pa+'</div><div style="font-size:.68rem;color:var(--t2)">Divergentes</div></div><div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--rd)">'+ic+'</div><div style="font-size:.68rem;color:var(--t2)">Sem Cargo</div></div></div>'+det;
+  if(colabs.length>15)det+='<p style="color:var(--t3)">(Primeiros 15 de '+colabs.length+')</p>';
+  var txt='<p><strong>◉ Análise CBO — '+eh(empAtual.nome)+'</strong></p>';
+  txt+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.5rem 0"><div style="background:rgba(34,197,94,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--gr)">'+ad+'</div><div style="font-size:.68rem;color:var(--t2)">Aderentes</div></div><div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--yw)">'+pa+'</div><div style="font-size:.68rem;color:var(--t2)">Divergentes</div></div><div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--rd)">'+ic+'</div><div style="font-size:.68rem;color:var(--t2)">Sem Cargo</div></div></div>'+det;
   var res=document.getElementById('ia-cbo-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
   var em=document.getElementById('ia-empty');if(em)em.style.display='none'
 }
 
-// RELATÓRIOS OPERACIONAIS PER-PROJECT
+// ═══ RELATÓRIOS OPERACIONAIS ═══
 function openRop(){
   if(!empAtual){toast('Abra um projeto primeiro.',false);return}
   document.getElementById('rop-id').value='';
@@ -1082,7 +1367,23 @@ function renderRops(emp){
 }
 function delRop(id){if(!confirm('Excluir relatório?'))return;sst('rops',(gst('rops')||[]).filter(function(r){return r.id!==id}));if(empAtual)renderRops(empAtual);toast('Excluído.')}
 
-// DASHBOARD ANALÍTICO
+// ═══ ANEXOS DO PROJETO ═══
+function renderAnexosProj(emp){
+  var el=document.getElementById('proj-anexos-list');if(!el)return;
+  var list=emp.anexos||[];
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◐</div><p>Nenhum anexo. Adicione arquivos ao projeto.</p></div>';return}
+  el.innerHTML=list.map(function(a,i){return '<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem;background:var(--nv2);border-radius:var(--r2);margin-bottom:.4rem"><span style="font-size:1.2rem">📎</span><div style="flex:1"><div style="font-size:.84rem">'+eh(a.nome)+'</div><div style="font-size:.72rem;color:var(--t3)">'+a.data+' · '+(a.tam?Math.round(a.tam/1024)+'KB':'')+'</div></div><button class="btn bd bs" onclick="delAnexoProj('+i+')">✕</button></div>'}).join('')
+}
+function addAnexoProj(input){
+  if(!empAtual||!input.files.length)return;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  if(!emps[idx].anexos)emps[idx].anexos=[];
+  Array.from(input.files).forEach(function(f){emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
+  sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Arquivo(s) adicionado(s)!')
+}
+function delAnexoProj(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].anexos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual)}
+
+// ═══ DASHBOARD ANALÍTICO ═══
 function renderAnal(){
   var emps=gst('emps')||[];var sel=document.getElementById('fil-emp');
   sel.innerHTML='<option value="">Todas as Empresas</option>';emps.forEach(function(e){sel.innerHTML+='<option value="'+e.id+'">'+eh(e.nome)+'</option>'});
@@ -1096,7 +1397,7 @@ function renderAnal(){
   document.getElementById('sla-list').innerHTML=slaH||'<p style="color:var(--t3);font-size:.8rem">Nenhum projeto.</p>'
 }
 
-// MÓDULOS
+// ═══ MÓDULOS ═══
 function renderCargos(){var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('cargos-tbody').innerHTML=cargos.length?cargos.map(function(c,i){return'<tr><td style="font-weight:600">'+eh(c.n)+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(em[c.emp]||'-')+'</td><td><button class="btn bd bs" onclick="delCargo('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo.</td></tr>'}
 function salvarCargo(){var n=gv('c-nome');if(!n){toast('Nome obrigatório.',false);return}var cargos=gst('cargos')||[];cargos.push({n:n,cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp')});sst('cargos',cargos);closeM('mcargo');renderCargos();toast('Cargo salvo!')}
 function delCargo(i){if(!confirm('Remover?'))return;var c=gst('cargos')||[];c.splice(i,1);sst('cargos',c);renderCargos()}
@@ -1108,29 +1409,27 @@ function renderGov(){var mb=gst('membros')||[];var emps=gst('emps')||[];var em={
 function salvarMembro(){var n=gv('mb-nome');if(!n){toast('Nome obrigatório.',false);return}var mb=gst('membros')||[];mb.push({nome:n,cargo:gv('mb-cargo'),emp:gv('mb-emp'),papel:gv('mb-papel')});sst('membros',mb);closeM('mmembro');renderGov();toast('Membro salvo!')}
 function delMembro(i){if(!confirm('Remover?'))return;var m=gst('membros')||[];m.splice(i,1);sst('membros',m);renderGov()}
 
-// USUÁRIOS
+// ═══ USUÁRIOS ═══
 function renderUsers(){
   var users=gst('users')||[];var can=sessao&&sessao.role==='admin';
   document.getElementById('users-grid').innerHTML=users.map(function(u,i){var cor=u.cor||CORES[i%CORES.length];var ini=u.ini||(u.nome.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase());var rm={admin:'Administrador',editor:'Editor',visualizador:'Visualizador'};return'<div class="uc"><div class="ua" style="background:linear-gradient(135deg,'+cor+','+cor+'99)">'+ini+'</div><div class="ui" style="flex:1"><h4>'+eh(u.nome)+'</h4><p>'+eh(u.email)+'</p><small>'+eh(u.funcao||rm[u.role]||u.role)+'</small></div>'+(can&&u.id!=='u1'?'<button class="btn bd bs" onclick="delUser(\''+u.id+'\')">✕</button>':'')+'</div>'}).join('')||'<div class="empty"><div class="empty-ico">◖</div><p>Nenhum usuário.</p></div>'
 }
 function salvarUser(){if(!sessao||sessao.role!=='admin'){toast('Sem permissão.',false);return}var users=gst('users')||[];if(users.length>=15){toast('Limite de 15.',false);return}var n=gv('u-nome'),e=gv('u-email'),s=gv('u-senha');var err=document.getElementById('u-err');if(!n||!e||!s){err.textContent='Preencha todos os campos.';return}if(s.length<6){err.textContent='Senha mín. 6 caracteres.';return}if(users.find(function(u){return u.email===e})){err.textContent='E-mail já cadastrado.';return}err.textContent='';var ini=n.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase();users.push({id:'u'+Date.now(),nome:n,email:e,senha:s,role:gv('u-role'),funcao:gv('u-funcao'),ini:ini,cor:CORES[users.length%CORES.length]});sst('users',users);closeM('muser');['u-nome','u-email','u-senha','u-funcao'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});renderUsers();toast('Usuário criado!')}
 function delUser(id){if(!confirm('Excluir usuário?'))return;sst('users',(gst('users')||[]).filter(function(u){return u.id!==id}));renderUsers();toast('Removido.')}
-
-// SENHA
 function alterarSenha(){var cur=gv('s1'),nv=gv('s2'),cf=gv('s3');var err=document.getElementById('s-err');var users=gst('users')||[];var u=users.find(function(x){return x.id===sessao.id});if(!u||u.senha!==cur){err.textContent='Senha atual incorreta.';return}if(nv.length<6){err.textContent='Mínimo 6 caracteres.';return}if(nv!==cf){err.textContent='Senhas não coincidem.';return}err.textContent='';u.senha=nv;sst('users',users);sessao=u;sst('sessao',u);closeM('msenha');['s1','s2','s3'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});toast('Senha alterada!')}
 
-// RELATÓRIOS GLOBAIS
+// ═══ RELATÓRIOS GLOBAIS ═══
 function relGeral(tipo){
   var emps=gst('emps')||[];
   if(tipo==='csv'){var h='Empresa,Setor,Status,Progresso,Início,Prazo\n';var csv=h+emps.map(function(e){return'"'+e.nome+'","'+(e.setor||'')+'","'+e.st+'","'+calcProg(e)+'%","'+(e.ini||'')+'","'+(e.fim||'')+'"'}).join('\n');dl('pccs360_projetos.csv',csv,'text/csv');toast('CSV exportado!');}
-  else{var w=window.open('','_blank');var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PCCS 360</title><style>body{font-family:Arial,sans-serif;padding:2rem}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.5rem 1rem;text-align:left}td{padding:.5rem 1rem;border-bottom:1px solid #eee}</style></head><body>';s+='<h1>PCCS 360 · Relatório Geral · Instituto Primazia</h1><p>'+new Date().toLocaleDateString('pt-BR')+'</p><table><tr><th>Empresa</th><th>Status</th><th>Progresso</th><th>Prazo</th></tr>';emps.forEach(function(e){s+='<tr><td>'+eh(e.nome)+'</td><td>'+e.st+'</td><td>'+calcProg(e)+'%</td><td>'+(e.fim?fd(e.fim):'-')+'</td></tr>'});s+='</table></body></html>';w.document.write(s);w.document.close();w.print()}
+  else{var w=window.open('','_blank');var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PCCS 360</title><style>body{font-family:Arial,sans-serif;padding:2rem}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.5rem 1rem;text-align:left}td{padding:.5rem 1rem;border-bottom:1px solid #eee}</style></head><body><h1>PCCS 360 · Relatório Geral</h1><p>'+new Date().toLocaleDateString('pt-BR')+'</p><table><tr><th>Empresa</th><th>Status</th><th>Progresso</th><th>Prazo</th></tr>';emps.forEach(function(e){s+='<tr><td>'+eh(e.nome)+'</td><td>'+e.st+'</td><td>'+calcProg(e)+'%</td><td>'+(e.fim?fd(e.fim):'-')+'</td></tr>'});s+='</table></body></html>';w.document.write(s);w.document.close();w.print()}
 }
 
-// BACKUP
-function backup(){var data={users:gst('users'),emps:gst('emps'),cargos:gst('cargos'),pes:gst('pes'),faixas:gst('faixas'),membros:gst('membros'),rops:gst('rops'),dt:new Date().toISOString()};dl('pccs360_backup_'+new Date().toISOString().split('T')[0]+'.json',JSON.stringify(data,null,2),'application/json');toast('Backup exportado!')}
-function restaurar(input){if(!input.files[0])return;var reader=new FileReader();reader.onload=function(e){try{var d=JSON.parse(e.target.result);['emps','users','cargos','pes','faixas','membros','rops'].forEach(function(k){if(d[k])sst(k,d[k])});toast('Restaurado! Recarregando...');setTimeout(function(){location.reload()},1500)}catch(ex){toast('Arquivo inválido.',false)}};reader.readAsText(input.files[0])}
+// ═══ BACKUP ═══
+function backup(){var data={users:gst('users'),emps:gst('emps'),cargos:gst('cargos'),pes:gst('pes'),faixas:gst('faixas'),membros:gst('membros'),rops:gst('rops'),changelog:gst('changelog'),dt:new Date().toISOString()};dl('pccs360_backup_'+new Date().toISOString().split('T')[0]+'.json',JSON.stringify(data,null,2),'application/json');toast('Backup exportado!')}
+function restaurar(input){if(!input.files[0])return;var reader=new FileReader();reader.onload=function(e){try{var d=JSON.parse(e.target.result);['emps','users','cargos','pes','faixas','membros','rops','changelog'].forEach(function(k){if(d[k])sst(k,d[k])});toast('Restaurado! Recarregando...');setTimeout(function(){location.reload()},1500)}catch(ex){toast('Arquivo inválido.',false)}};reader.readAsText(input.files[0])}
 
-// START
+// ═══ START ═══
 init();
 
 </script>
