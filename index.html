@@ -5,19 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCCS 360 · Instituto Primazia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-function verColabDet(i){
-  if(!empAtual)return;var c=(empAtual.colabs||[])[i];if(!c)return;
-  var el=document.getElementById('mcolab-det');if(!el){toast('Modal nao disponivel',false);return}
-  document.getElementById('colab-det-idx').value=i;
-  var nd=document.getElementById('colab-det-titulo');if(nd)nd.textContent='Cadastro: '+(c.nome||'');
-  var set=function(id,val){var e=document.getElementById(id);if(e)e.value=val||''};
-  set('cd-nome',c.nome);set('cd-cpf',c.cpf);set('cd-nasc',toISO(c.nasc||''));set('cd-adm1',toISO(c.adm1||''));set('cd-adm',toISO(c.adm||''));
-  set('cd-cargo',c.cargo);set('cd-real',c.real);set('cd-cbo',c.cbo);set('cd-cc',c.cc);
-  set('cd-gestor',c.gestor);set('cd-unidade',c.unidade);set('cd-sal',c.sal);set('cd-bene',c.bene);set('cd-obs',c.obs);
-  set('cd-ates',c.ates||'');set('cd-afas',c.afas||'');
-  ['sexo','depto','vinc','jornada','escol','sit'].forEach(function(k){var e=document.getElementById('cd-'+k);if(e)e.value=c[k]||''});
-  colabDetDocs=c.docs||[];renderColabDetDocs();openM('mcolab-det')
-}
 function selecionarTodos(){
   var cbs=document.querySelectorAll('.colab-cb');
   var all=![...cbs].every(function(cb){return cb.checked});
@@ -31,6 +18,184 @@ function excluirSelecionados(){
   var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
   indices.forEach(function(i){emps[idx].colabs.splice(i,1)});
   sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast(indices.length+' removido(s).')
+}
+
+function detectIncons(emp){
+  var ic=[];
+  (emp.colabs||[]).forEach(function(c,i){
+    if(!c.nome)return;
+    if(!c.cargo&&!c.real)ic.push({i:i,n:c.nome,tipo:'Sem cargo definido',nivel:'Alto',sug:'Definir cargo CTPS — risco trabalhista'});
+    if(!c.sal||parseFloat(c.sal)<1412)ic.push({i:i,n:c.nome,tipo:'Salário ausente ou abaixo do mínimo',nivel:'Alto',sug:'Regularizar salário (mínimo R$ 1.412)'});
+    if(!c.depto)ic.push({i:i,n:c.nome,tipo:'Sem departamento',nivel:'Médio',sug:'Vincular a um departamento'});
+    if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8)ic.push({i:i,n:c.nome,tipo:'Função real diverge do cargo CTPS',nivel:'Alto',sug:'Verificar CBO — risco de desvio de função'});
+  });
+  return ic
+}
+
+function renderCargos(){var cargos=gst('cargos')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('cargos-tbody').innerHTML=cargos.length?cargos.map(function(c,i){return'<tr><td style="font-weight:600">'+eh(c.n)+'</td><td>'+eh(c.cbo||'-')+'</td><td>'+eh(c.fam||'-')+'</td><td>'+eh(c.niv||'-')+'</td><td>'+eh(em[c.emp]||'-')+'</td><td><button class="btn bd bs" onclick="delCargo('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum cargo.</td></tr>'}
+
+function salvarCargo(){var n=gv('c-nome');if(!n){toast('Nome obrigatório.',false);return}var cargos=gst('cargos')||[];cargos.push({n:n,cbo:gv('c-cbo'),fam:gv('c-fam'),niv:gv('c-niv'),emp:gv('c-emp')});sst('cargos',cargos);closeM('mcargo');renderCargos();toast('Cargo salvo!')}
+
+function renderPes(){var ps=gst('pes')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});document.getElementById('pes-tbody').innerHTML=ps.length?ps.map(function(p){return'<tr><td style="font-weight:600">'+eh(p.cargo)+'</td><td>'+eh(em[p.emp]||'-')+'</td><td>'+fmt(p.p25)+'</td><td style="color:var(--gd)">'+fmt(p.p50)+'</td><td>'+fmt(p.p75)+'</td><td>'+eh(p.fonte||'-')+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma pesquisa.</td></tr>'}
+
+function salvarPes(){var n=gv('ps-cargo');if(!n){toast('Cargo obrigatório.',false);return}var ps=gst('pes')||[];ps.push({cargo:n,emp:gv('ps-emp'),p25:gv('ps-p25'),p50:gv('ps-p50'),p75:gv('ps-p75'),fonte:gv('ps-fonte')});sst('pes',ps);closeM('mpes');renderPes();toast('Pesquisa salva!')}
+
+function renderEst(){var fx=gst('faixas')||[];document.getElementById('est-tbody').innerHTML=fx.length?fx.map(function(f){var amp=f.min&&f.max?Math.round((f.max/f.min-1)*100)+'%':'-';return'<tr><td style="font-weight:600">'+eh(f.fam)+'</td><td>'+eh(f.niv)+'</td><td>'+fmt(f.min)+'</td><td style="color:var(--gd)">'+fmt(f.mid)+'</td><td>'+fmt(f.max)+'</td><td>'+amp+'</td></tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhuma faixa.</td></tr>'}
+
+function salvarFaixa(){var n=gv('fx-fam');if(!n){toast('Família obrigatória.',false);return}var fx=gst('faixas')||[];fx.push({fam:n,niv:gv('fx-niv'),min:gv('fx-min'),mid:gv('fx-mid'),max:gv('fx-max'),emp:gv('fx-emp')});sst('faixas',fx);closeM('mfaixa');renderEst();toast('Faixa salva!')}
+
+function renderGov(){var mb=gst('membros')||[];var emps=gst('emps')||[];var em={};emps.forEach(function(e){em[e.id]=e.nome});var gr=document.getElementById('gov-reg');if(gr)gr.value=gst('govReg')||'';document.getElementById('gov-tbody').innerHTML=mb.length?mb.map(function(m,i){return'<tr><td style="font-weight:600">'+eh(m.nome)+'</td><td>'+eh(m.cargo||'-')+'</td><td>'+eh(em[m.emp]||'-')+'</td><td><span class="b by">'+eh(m.papel)+'</span></td><td><button class="btn bd bs" onclick="delMembro('+i+')">✕</button></td></tr>'}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:2rem">Nenhum membro.</td></tr>'}
+
+function salvarMembro(){var n=gv('mb-nome');if(!n){toast('Nome obrigatório.',false);return}var mb=gst('membros')||[];mb.push({nome:n,cargo:gv('mb-cargo'),emp:gv('mb-emp'),papel:gv('mb-papel')});sst('membros',mb);closeM('mmembro');renderGov();toast('Membro salvo!')}
+
+function openRop(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  document.getElementById('rop-id').value='';
+  document.getElementById('rop-data').value=new Date().toISOString().split('T')[0];
+  ['rop-titulo','rop-sit','rop-passos'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});
+  document.getElementById('rop-status').value='Em andamento';
+  var sel=document.getElementById('rop-emp');if(sel){popEmpSels();sel.value=empAtual.id}
+  var users=gst('users')||[];var cs=document.getElementById('rop-consul');if(cs){cs.innerHTML='<option value="">-- Selecionar --</option>';users.forEach(function(u){cs.innerHTML+='<option>'+eh(u.nome)+'</option>'})}
+  openM('mrop')
+}
+
+function salvarRop(){
+  var empId=document.getElementById('rop-emp').value;var titulo=gv('rop-titulo');
+  if(!empId||!titulo){toast('Empresa e título obrigatórios.',false);return}
+  var rops=gst('rops')||[];var id=document.getElementById('rop-id').value||('r'+Date.now());
+  var rop={id:id,empId:empId,tipo:gv('rop-tipo'),titulo:cap(titulo),status:gv('rop-status'),data:gv('rop-data'),consul:gv('rop-consul'),sit:gv('rop-sit'),passos:gv('rop-passos'),criado:new Date().toISOString()};
+  var idx=rops.findIndex(function(r){return r.id===id});if(idx>=0)rops[idx]=rop;else rops.push(rop);
+  sst('rops',rops);closeM('mrop');toast('Relatório salvo!');if(empAtual)renderRops(empAtual)
+}
+
+function delRop(id){if(!confirm('Excluir relatório?'))return;sst('rops',(gst('rops')||[]).filter(function(r){return r.id!==id}));if(empAtual)renderRops(empAtual);toast('Excluído.')}
+
+function renderAnexosProj(emp){
+  var el=document.getElementById('proj-anexos-list');if(!el)return;
+  var list=emp.anexos||[];
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">◐</div><p>Nenhum anexo. Adicione arquivos ao projeto.</p></div>';return}
+  el.innerHTML=list.map(function(a,i){return '<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem;background:var(--nv2);border-radius:var(--r2);margin-bottom:.4rem"><span style="font-size:1.2rem">📎</span><div style="flex:1"><div style="font-size:.84rem">'+eh(a.nome)+'</div><div style="font-size:.72rem;color:var(--t3)">'+a.data+' · '+(a.tam?Math.round(a.tam/1024)+'KB':'')+'</div></div><button class="btn bd bs" onclick="delAnexoProj('+i+')">✕</button></div>'}).join('')
+}
+
+function addAnexoProj(input){
+  if(!empAtual||!input.files.length)return;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  if(!emps[idx].anexos)emps[idx].anexos=[];
+  Array.from(input.files).forEach(function(f){emps[idx].anexos.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
+  sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual);toast('Arquivo(s) adicionado(s)!')
+}
+
+function delAnexoProj(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].anexos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderAnexosProj(empAtual)}
+
+function verColabDet(i){
+  if(!empAtual)return;
+  var c=(empAtual.colabs||[])[i];if(!c)return;
+  document.getElementById('colab-det-idx').value=i;
+  document.getElementById('colab-det-titulo').textContent='◕ '+eh(c.nome||'Colaborador');
+  colabDetDocs=c.docs||[];
+  var set=function(id,val){var e=document.getElementById(id);if(e)e.value=val||''};
+  set('cd-nome',c.nome);set('cd-cpf',c.cpf);set('cd-nasc',toISO(c.nasc));set('cd-adm1',toISO(c.adm1));set('cd-adm',toISO(c.adm));
+  set('cd-cargo',c.cargo);set('cd-real',c.real);set('cd-cbo',c.cbo);set('cd-cc',c.cc);
+  set('cd-gestor',c.gestor);set('cd-unidade',c.unidade);set('cd-sal',c.sal);set('cd-bene',c.bene);set('cd-obs',c.obs);
+  set('cd-ates',c.ates);set('cd-afas',c.afas);
+  var sels={sexo:'cd-sexo',depto:'cd-depto',vinc:'cd-vinc',jornada:'cd-jornada',escol:'cd-escol',sit:'cd-sit'};
+  Object.keys(sels).forEach(function(k){var e=document.getElementById(sels[k]);if(e)e.value=c[k]||''});
+  renderColabDetDocs();
+  openM('mcolab-det')
+}
+
+function salvarColabDet(){
+  if(!empAtual)return;
+  var i=parseInt(document.getElementById('colab-det-idx').value);
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  var c=emps[idx].colabs[i];if(!c)return;
+  var gv2=function(id){var e=document.getElementById(id);return e?e.value.trim():''};
+  c.nome=cap(gv2('cd-nome'));c.cpf=gv2('cd-cpf');c.sexo=gv2('cd-sexo');c.nasc=gv2('cd-nasc');c.adm1=gv2('cd-adm1');c.adm=gv2('cd-adm');
+  c.cargo=cap(gv2('cd-cargo'));c.real=cap(gv2('cd-real'));c.cbo=gv2('cd-cbo');c.depto=gv2('cd-depto');c.cc=gv2('cd-cc');
+  c.gestor=cap(gv2('cd-gestor'));c.unidade=cap(gv2('cd-unidade'));c.vinc=gv2('cd-vinc');c.jornada=gv2('cd-jornada');
+  c.sal=gv2('cd-sal');c.escol=gv2('cd-escol');c.bene=gv2('cd-bene');c.sit=gv2('cd-sit');c.ates=gv2('cd-ates');c.afas=gv2('cd-afas');
+  c.obs=gv2('cd-obs');c.docs=colabDetDocs.slice();
+  sst('emps',emps);empAtual=emps[idx];closeM('mcolab-det');renderColabs(empAtual);toast('Cadastro atualizado!')
+}
+
+function gerarRelColabPDF(){
+  var i=parseInt(document.getElementById('colab-det-idx').value);
+  var c=(empAtual&&empAtual.colabs)?empAtual.colabs[i]:null;if(!c)return;
+  var w=window.open('','_blank');
+  var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+c.nome+'</title><style>body{font-family:Arial,sans-serif;padding:2rem;background:#fff}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}h2{color:#c9a84c;font-size:.9rem;margin:1rem 0 .3rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem}.field{margin-bottom:.5rem}.label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block}.val{font-size:.9rem;color:#111}</style></head><body>';
+  s+='<h1>PCCS 360 · Ficha do Colaborador</h1>';
+  s+='<h2>Dados Pessoais</h2><div class="grid">';
+  var fields=[['Nome',c.nome],['CPF',c.cpf],['Sexo',c.sexo],['Nascimento',c.nasc?fd(c.nasc):''],['1ª Admissão',c.adm1?fd(c.adm1):''],['Admissão Atual',c.adm?fd(c.adm):'']];
+  fields.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div><h2>Dados Funcionais</h2><div class="grid">';
+  var fields2=[['Cargo CTPS',c.cargo],['Função Real',c.real],['CBO',c.cbo],['Departamento',c.depto],['Centro Custo',c.cc],['Gestor',c.gestor],['Unidade',c.unidade],['Vínculo',c.vinc],['Jornada',c.jornada],['Salário Base',c.sal?fmt(c.sal):''],['Escolaridade',c.escol],['Situação',c.sit],['Benefícios',c.bene]];
+  fields2.forEach(function(f){if(f[1])s+='<div class="field"><span class="label">'+f[0]+'</span><span class="val">'+eh(f[1])+'</span></div>'});
+  s+='</div></body></html>';
+  w.document.write(s);w.document.close();w.print()
+}
+
+function renderColabDetDocs(){
+  var el=document.getElementById('colab-det-docs');if(!el)return;
+  el.innerHTML=colabDetDocs.map(function(d,i){return '<div class="parti-chip">📎 '+eh(d.nome)+'<button onclick="colabDetDocs.splice('+i+',1);renderColabDetDocs()">✕</button></div>'}).join('')
+}
+
+function addColabDocDet(input){
+  Array.from(input.files).forEach(function(f){colabDetDocs.push({nome:f.name,tipo:f.type,tam:f.size,data:now()})});
+  renderColabDetDocs()
+}
+
+function relGeral(tipo){
+  var emps=gst('emps')||[];
+  if(tipo==='csv'){var h='Empresa,Setor,Status,Progresso,Início,Prazo\n';var csv=h+emps.map(function(e){return'"'+e.nome+'","'+(e.setor||'')+'","'+e.st+'","'+calcProg(e)+'%","'+(e.ini||'')+'","'+(e.fim||'')+'"'}).join('\n');dl('pccs360_projetos.csv',csv,'text/csv');toast('CSV exportado!');}
+  else{var w=window.open('','_blank');var s='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PCCS 360</title><style>body{font-family:Arial,sans-serif;padding:2rem}h1{color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.5rem}table{width:100%;border-collapse:collapse;margin:1rem 0}th{background:#0d1b2e;color:#fff;padding:.5rem 1rem;text-align:left}td{padding:.5rem 1rem;border-bottom:1px solid #eee}</style></head><body><h1>PCCS 360 · Relatório Geral</h1><p>'+new Date().toLocaleDateString('pt-BR')+'</p><table><tr><th>Empresa</th><th>Status</th><th>Progresso</th><th>Prazo</th></tr>';emps.forEach(function(e){s+='<tr><td>'+eh(e.nome)+'</td><td>'+e.st+'</td><td>'+calcProg(e)+'%</td><td>'+(e.fim?fd(e.fim):'-')+'</td></tr>'});s+='</table></body></html>';w.document.write(s);w.document.close();w.print()}
+}
+
+function salvarUser(){if(!sessao||sessao.role!=='admin'){toast('Sem permissão.',false);return}var users=gst('users')||[];if(users.length>=15){toast('Limite de 15.',false);return}var n=gv('u-nome'),e=gv('u-email'),s=gv('u-senha');var err=document.getElementById('u-err');if(!n||!e||!s){err.textContent='Preencha todos os campos.';return}if(s.length<6){err.textContent='Senha mín. 6 caracteres.';return}if(users.find(function(u){return u.email===e})){err.textContent='E-mail já cadastrado.';return}err.textContent='';var ini=n.split(' ').map(function(w){return w[0]||''}).join('').substring(0,2).toUpperCase();users.push({id:'u'+Date.now(),nome:n,email:e,senha:s,role:gv('u-role'),funcao:gv('u-funcao'),ini:ini,cor:CORES[users.length%CORES.length]});sst('users',users);closeM('muser');['u-nome','u-email','u-senha','u-funcao'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});renderUsers();toast('Usuário criado!')}
+
+function alterarSenha(){var cur=gv('s1'),nv=gv('s2'),cf=gv('s3');var err=document.getElementById('s-err');var users=gst('users')||[];var u=users.find(function(x){return x.id===sessao.id});if(!u||u.senha!==cur){err.textContent='Senha atual incorreta.';return}if(nv.length<6){err.textContent='Mínimo 6 caracteres.';return}if(nv!==cf){err.textContent='Senhas não coincidem.';return}err.textContent='';u.senha=nv;sst('users',users);sessao=u;sst('sessao',u);closeM('msenha');['s1','s2','s3'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});toast('Senha alterada!')}
+
+function rodarIACBO(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  var colabs=empAtual.colabs||[];if(!colabs.length){toast('Importe colaboradores primeiro.',false);return}
+  var ad=0,pa=0,ic=0;var det='';
+  colabs.slice(0,15).forEach(function(c){
+    if(!c.cargo&&!c.real){ic++;det+='<p style="color:var(--rd)">🔴 <strong>'+eh(c.nome)+'</strong>: Sem cargo — CBO não verificável.</p>'}
+    else if(c.cargo&&c.real&&c.cargo.toLowerCase()!==c.real.toLowerCase()&&Math.abs(c.cargo.length-c.real.length)>8){pa++;det+='<p style="color:var(--yw)">🟡 <strong>'+eh(c.nome)+'</strong>: "'+eh(c.cargo)+'" ≠ "'+eh(c.real)+'" — Verificar desvio.</p>'}
+    else{ad++;det+='<p style="color:var(--gr)">🟢 <strong>'+eh(c.nome||'-')+'</strong>: Alinhado.</p>'}
+  });
+  if(colabs.length>15)det+='<p style="color:var(--t3)">(Primeiros 15 de '+colabs.length+')</p>';
+  var txt='<p><strong>◉ Análise CBO — '+eh(empAtual.nome)+'</strong></p>';
+  txt+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.5rem 0"><div style="background:rgba(34,197,94,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--gr)">'+ad+'</div><div style="font-size:.68rem;color:var(--t2)">Aderentes</div></div><div style="background:rgba(245,158,11,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--yw)">'+pa+'</div><div style="font-size:.68rem;color:var(--t2)">Divergentes</div></div><div style="background:rgba(239,68,68,.1);border-radius:var(--r2);padding:.5rem;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:var(--rd)">'+ic+'</div><div style="font-size:.68rem;color:var(--t2)">Sem Cargo</div></div></div>'+det;
+  var res=document.getElementById('ia-cbo-res');if(res){res.style.display='block';res.querySelector('.ai-out').innerHTML=txt}
+  var em=document.getElementById('ia-empty');if(em)em.style.display='none'
+}
+
+function salvarColab(){
+  if(!empAtual)return;
+  var n=gv('cl-nome');var err=document.getElementById('colab-err');
+  if(!n){err.textContent='Nome obrigatório.';return}err.textContent='';
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  if(!emps[idx].colabs)emps[idx].colabs=[];
+  emps[idx].colabs.push({nome:cap(n),cpf:gv('cl-cpf'),sexo:gv('cl-sexo'),nasc:gv('cl-nasc'),adm1:gv('cl-adm1'),adm:gv('cl-adm'),cargo:cap(gv('cl-cargo')),real:cap(gv('cl-real')),depto:gv('cl-depto'),cc:gv('cl-cc'),gestor:cap(gv('cl-gestor')),unidade:cap(gv('cl-unidade')),vinc:gv('cl-vinc'),jornada:gv('cl-jornada'),sal:gv('cl-sal'),escol:gv('cl-escol'),bene:gv('cl-bene'),sit:gv('cl-sit')||'Trabalhando',obs:gv('cl-obs'),docs:[],cbo:''});
+  sst('emps',emps);empAtual=emps[idx];closeM('mcolab');renderColabs(empAtual);renderDetStats(empAtual);toast('Colaborador salvo!');
+  ['cl-nome','cl-cpf','cl-nasc','cl-adm1','cl-adm','cl-cargo','cl-real','cl-cc','cl-gestor','cl-unidade','cl-bene','cl-obs'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''})
+}
+
+function delDepto(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].deptos.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderDeptos(empAtual);renderDetStats(empAtual)}
+
+function salvarDepto(){if(!empAtual)return;var n=gv('d-nome');if(!n){toast('Nome obrigatório.',false);return}var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;if(!emps[idx].deptos)emps[idx].deptos=[];emps[idx].deptos.push({nome:cap(n),resp:gv('d-resp')});sst('emps',emps);empAtual=emps[idx];closeM('mdepto');renderDeptos(empAtual);renderDetStats(empAtual);toast('Departamento salvo!');document.getElementById('d-nome').value='';document.getElementById('d-resp').value=''}
+
+function delColab(i){if(!empAtual||!confirm('Remover?'))return;var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;emps[idx].colabs.splice(i,1);sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual)}
+
+function delCargo(i){if(!confirm('Remover?'))return;var c=gst('cargos')||[];c.splice(i,1);sst('cargos',c);renderCargos()}
+
+function delUser(id){if(!confirm('Excluir usuário?'))return;sst('users',(gst('users')||[]).filter(function(u){return u.id!==id}));renderUsers();toast('Removido.')}
+
+function zerarColabs(){
+  if(!empAtual)return;
+  if(!confirm('Isso vai remover TODOS os colaboradores de '+empAtual.nome+'. Confirmar?'))return;
+  var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  emps[idx].colabs=[];sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast('Colaboradores removidos!')
 }
 
 </script>
@@ -406,7 +571,7 @@ input[type="date"].inp{color-scheme:dark}
     <div class="tabs" id="projeto-tabs">
       <button class="tab on" onclick="tabP('tp0',this)">◈ Visão Geral</button>
       <button class="tab" onclick="tabP('tp1',this)">◉ Fases do PCCS</button>
-      <button class="tab" onclick="tabP('tp2',this)">◎ Kanban</button>
+      
       <button class="tab" onclick="tabP('tp3',this)">◐ Performance</button>
       <button class="tab" onclick="tabP('tp4',this)">◑ Colaboradores</button>
       <button class="tab" onclick="tabP('tp5',this)">◒ Departamentos</button>
@@ -447,6 +612,7 @@ input[type="date"].inp{color-scheme:dark}
             <label class="btn bg bs" style="cursor:pointer">&#11014; Importar Excel/CSV<input type="file" accept=".csv,.xlsx,.xls" style="display:none" onchange="importColabs(this)"></label>
             <button class="btn bg bs" onclick="openM('mcolab')">+ Cadastrar Manual</button>
             <button class="btn bh bs" onclick="exportColabs()">&#11015; Exportar CSV</button>
+            <button class="btn bd bs" onclick="zerarColabs()" title="Remover todos os colaboradores">&#128465; Zerar</button>
           </div>
         </div>
       </div>
