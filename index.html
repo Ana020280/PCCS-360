@@ -299,7 +299,9 @@ input[type="date"].inp{color-scheme:dark}
       <div class="sb-sec">
         <div class="sb-lbl">GESTÃO</div>
         <button class="ni" data-v="vrel" onclick="nav('vrel')"><span class="ni-ico">◕</span>Relatórios</button>
+        <button class="ni" data-v="vgerador" onclick="nav('vgerador')"><span class="ni-ico">&#9733;</span>Gerador</button>
         <button class="ni" data-v="vconf" onclick="nav('vconf')"><span class="ni-ico">◗</span>Configurações</button>
+        <button class="ni" data-v="vaudit" onclick="nav('vaudit')"><span class="ni-ico">&#9670;</span>Auditoria</button>
         <button class="ni" data-v="vlog" onclick="nav('vlog')"><span class="ni-ico">◆</span>Registro de Alterações</button>
       </div>
       <div class="sb-sec">
@@ -421,6 +423,11 @@ input[type="date"].inp{color-scheme:dark}
           </div>
         </div>
       </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap;align-items:center">
+        <input type="checkbox" id="cb-todos" onclick="selecionarTodos()" style="width:16px;height:16px;cursor:pointer" title="Marcar/Desmarcar todos">
+        <label for="cb-todos" style="font-size:.78rem;color:var(--t2);cursor:pointer">Selecionar todos</label>
+        <button class="btn bd bs" id="btn-excluir-sel" onclick="excluirSelecionados()" style="margin-left:.5rem">🗑 Excluir Selecionados (0)</button>
+      </div>
       <div style="display:flex;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap">
         <input class="inp" id="busca-colab" placeholder="Buscar colaborador..." style="flex:1;min-width:160px;padding:.38rem .8rem;font-size:.8rem" oninput="filtrarColabs()">
         <select class="inp" id="fil-depto" onchange="filtrarColabs()" style="width:180px;padding:.38rem .7rem;font-size:.78rem"><option value="">Todos os departamentos</option></select>
@@ -524,11 +531,95 @@ input[type="date"].inp{color-scheme:dark}
   </div>
 </div>
 
-    </main>
+<!-- GERADOR DE RELATÓRIOS -->
+<div class="view" id="vgerador">
+  <div class="phdr">
+    <div><h2>Gerador de <em>Relatórios</em></h2><p>Relatórios profissionais com timbrado, gráficos e análise por fase</p></div>
+  </div>
+  <div class="content">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+      <div class="card" style="cursor:pointer;border-color:rgba(201,168,76,.3)" onclick="abrirGerarRelatorio()">
+        <div style="font-size:2rem;margin-bottom:.5rem">📄</div>
+        <h4 style="font-family:Cinzel,serif;color:var(--gd);margin-bottom:.3rem">Relatório por Fases</h4>
+        <p style="font-size:.78rem;color:var(--t2)">Relatório completo com fases selecionadas, gráficos, tabelas, análise de colaboradores e inconsistências</p>
+        <button class="btn bg" style="margin-top:.8rem;width:100%">Gerar Relatório →</button>
+      </div>
+      <div class="card" style="opacity:.6">
+        <div style="font-size:2rem;margin-bottom:.5rem">📊</div>
+        <h4 style="font-family:Cinzel,serif;color:var(--gr);margin-bottom:.3rem">Relatório de Colaboradores</h4>
+        <p style="font-size:.78rem;color:var(--t2)">Exportação completa do quadro de pessoal com dados salariais</p>
+        <button class="btn bg" style="margin-top:.8rem;width:100%;opacity:.5" disabled>Em breve</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="sec-t">🖼 Configurar Logos para Relatórios</div>
+      <p style="font-size:.8rem;color:var(--t2);margin-bottom:.8rem">As logos aparecerão no cabeçalho de todos os relatórios gerados.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div><div style="font-size:.78rem;font-weight:600;color:var(--gd);margin-bottom:.4rem">Logo Instituto Primazia</div>
+          <label class="btn bh bs" style="cursor:pointer;display:block;text-align:center">&#128247; Carregar Logo<input type="file" accept="image/*" style="display:none" onchange="relUploadLogo(this,'logoInst')"></label>
+          <img id="prev-logo-logoInst" style="display:none;max-height:60px;margin-top:.5rem;border-radius:4px">
+        </div>
+        <div><div style="font-size:.78rem;font-weight:600;color:var(--gd);margin-bottom:.4rem">Logo da Empresa Cliente</div>
+          <label class="btn bh bs" style="cursor:pointer;display:block;text-align:center">&#128247; Carregar Logo<input type="file" accept="image/*" style="display:none" onchange="relUploadLogo(this,'logoEmp')"></label>
+          <img id="prev-logo-logoEmp" style="display:none;max-height:60px;margin-top:.5rem;border-radius:4px">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+<!-- AUDITORIA -->
+<div class="view" id="vaudit">
+  <div class="phdr">
+    <div><h2>Auditoria e <em>Rastreabilidade</em></h2><p>Histórico de todas as alterações, inclusões e exclusões</p></div>
+    <div class="phdr-r">
+      <button class="btn bh bs" onclick="exportAudit()">&#11015; Exportar CSV</button>
+      <button class="btn bd bs" onclick="limparAudit()">&#128465; Limpar</button>
+    </div>
+  </div>
+  <div class="content">
+    <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+      <input class="inp" id="busca-audit" placeholder="Buscar..." style="flex:1;min-width:160px;padding:.38rem .8rem;font-size:.8rem" oninput="renderAudit()">
+      <select class="inp" id="fil-audit-mod" onchange="renderAudit()" style="width:170px;padding:.38rem .7rem;font-size:.78rem">
+        <option value="">Todos os módulos</option>
+        <option>Colaboradores</option><option>Fases</option><option>Empresas</option>
+        <option>Relatório</option><option>Projeto</option><option>Status</option>
+      </select>
+    </div>
+    <div class="tw">
+      <table><thead><tr><th>Data / Hora</th><th>Usuário</th><th>Ação</th><th>Módulo</th><th>Empresa</th><th>Detalhe</th></tr></thead>
+      <tbody id="audit-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+</main>
   </div>
 </div>
 
 <!-- MODAIS -->
+<!-- MODAL GERADOR DE RELATÓRIO -->
+<div class="ov" id="mgerador-rel">
+  <div class="modal" style="max-width:560px">
+    <div class="mhdr"><h3>&#9733; Gerar Relatório</h3><button class="mcl" onclick="closeM('mgerador-rel')">&#10005;</button></div>
+    <h4 id="mrel-titulo" style="color:var(--gd);font-family:Cinzel,serif;margin-bottom:.8rem;font-size:.9rem"></h4>
+    <div class="fg"><label>Tipo de Relatório</label>
+      <select class="inp" id="rel-tipo">
+        <option>Diagnóstico Inicial</option>
+        <option>Progresso do Projeto</option>
+        <option>Relatório Final PCCS</option>
+        <option>Relatório de Fase</option>
+        <option>Relatório Executivo</option>
+      </select>
+    </div>
+    <div class="fg"><label>Selecionar Fases</label>
+      <div id="rel-fases-sel" style="background:var(--nv3);border-radius:var(--r2);padding:.5rem;max-height:200px;overflow-y:auto"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem">
+      <button class="btn bh" onclick="closeM('mgerador-rel')">Cancelar</button>
+      <button class="btn bg" onclick="gerarRelatorio()">&#9733; Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
 <div class="ov" id="memp">
   <div class="modal" style="max-width:600px">
     <div class="mhdr"><h3>◈ Empresa / Projeto</h3><button class="mcl" onclick="closeM('memp')">&#10005;</button></div>
@@ -761,6 +852,7 @@ input[type="date"].inp{color-scheme:dark}
 <div class="toast" id="toast"><span id="t-ico">&#10003;</span><span id="t-msg">Salvo!</span></div>
 
 <script>
+
 
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
@@ -1385,15 +1477,24 @@ function finalizarImport(rows,colMap){
 }
 
 // ══ BULK COLABS ══
-function selecionarTodos(){var cbs=document.querySelectorAll('.colab-cb');var all=![...cbs].every(function(cb){return cb.checked});cbs.forEach(function(cb){cb.checked=all})}
+function selecionarTodos(){
+  var cbs=document.querySelectorAll('.colab-cb');
+  var all=![...cbs].every(function(cb){return cb.checked});
+  cbs.forEach(function(cb){cb.checked=all});
+  atualizarBtnExcluir()
+}
 function excluirSelecionados(){
   var cbs=document.querySelectorAll('.colab-cb:checked');
-  if(!cbs.length){toast('Selecione colaboradores.',false);return}
-  if(!confirm('Excluir '+cbs.length+' colaborador(es)?'))return;
+  if(!cbs.length){toast('Selecione ao menos um colaborador.',false);return}
+  if(!confirm('Excluir '+cbs.length+' colaborador(es) selecionado(s)? Esta ação não pode ser desfeita.'))return;
   var indices=[...cbs].map(function(cb){return parseInt(cb.value)}).sort(function(a,b){return b-a});
   var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===empAtual.id});if(idx<0)return;
+  var nomes=indices.map(function(i){return emps[idx].colabs[i]?emps[idx].colabs[i].nome:''}).filter(Boolean);
   indices.forEach(function(i){emps[idx].colabs.splice(i,1)});
-  sst('emps',emps);empAtual=emps[idx];renderColabs(empAtual);renderDetStats(empAtual);toast(indices.length+' removido(s).')
+  sst('emps',emps);empAtual=emps[idx];
+  logAudit('Exclusão em lote','Colaboradores','Excluídos: '+nomes.join(', '));
+  renderColabs(empAtual);renderDetStats(empAtual);
+  toast(indices.length+' colaborador(es) removido(s).')
 }
 function zerarColabs(){
   if(!empAtual||!confirm('Remover TODOS os colaboradores?'))return;
@@ -1735,6 +1836,280 @@ function delAtvAnexo(eid,fi,ai,axi){
   var emps=gst('emps')||[];var idx=emps.findIndex(function(e){return e.id===eid});if(idx<0)return;
   var a=emps[idx].fases[fi].atividades[ai];if(!a||!a.anexos)return;
   a.anexos.splice(axi,1);sst('emps',emps);empAtual=emps[idx];renderFases(empAtual);toast('Anexo removido.')
+}
+
+function logAudit(acao,modulo,detalhe,empNome){
+  var audit=gst('audit')||[];
+  audit.push({
+    id:'a'+Date.now(),
+    dt:new Date().toLocaleString('pt-BR'),
+    user:sessao?sessao.nome:'Sistema',
+    acao:acao,
+    modulo:modulo,
+    detalhe:detalhe||'',
+    emp:empNome||( empAtual?empAtual.nome:'')
+  });
+  // Keep last 500 entries
+  if(audit.length>500)audit=audit.slice(-500);
+  sst('audit',audit)
+}
+function renderAudit(){
+  var el=document.getElementById('audit-tbody');if(!el)return;
+  var audit=(gst('audit')||[]).slice().reverse();
+  var fil=document.getElementById('fil-audit-mod');
+  var filUser=document.getElementById('fil-audit-user');
+  var search=document.getElementById('busca-audit');
+  if(fil&&fil.value)audit=audit.filter(function(a){return a.modulo===fil.value});
+  if(filUser&&filUser.value)audit=audit.filter(function(a){return a.user===filUser.value});
+  if(search&&search.value){var q=search.value.toLowerCase();audit=audit.filter(function(a){return(a.detalhe||'').toLowerCase().indexOf(q)>=0||(a.acao||'').toLowerCase().indexOf(q)>=0})}
+  el.innerHTML=audit.length?audit.slice(0,200).map(function(a){
+    var cls=a.acao.indexOf('Exclus')>=0?'br':a.acao.indexOf('Import')>=0?'bb':a.acao.indexOf('Altera')>=0?'by':'bk';
+    return'<tr>'+
+      '<td style="font-size:.75rem;color:var(--t3);white-space:nowrap">'+eh(a.dt)+'</td>'+
+      '<td style="font-weight:600">'+eh(a.user)+'</td>'+
+      '<td><span class="b '+cls+'" style="font-size:.65rem">'+eh(a.acao)+'</span></td>'+
+      '<td><span class="b bk" style="font-size:.65rem">'+eh(a.modulo)+'</span></td>'+
+      '<td style="color:var(--t2);font-size:.8rem">'+eh(a.emp||'-')+'</td>'+
+      '<td style="font-size:.78rem;color:var(--t2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+eh(a.detalhe)+'">'+eh(a.detalhe||'-')+'</td>'+
+    '</tr>'
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:2rem">Nenhum registro de auditoria.</td></tr>'
+}
+function limparAudit(){
+  if(!confirm('Limpar todo o histórico de auditoria?'))return;
+  sst('audit',[]);renderAudit();toast('Histórico limpo.')
+}
+function exportAudit(){
+  var audit=gst('audit')||[];
+  var csv='Data/Hora,Usuario,Acao,Modulo,Empresa,Detalhe\n';
+  csv+=audit.map(function(a){return'"'+a.dt+'","'+a.user+'","'+a.acao+'","'+a.modulo+'","'+(a.emp||'')+'","'+(a.detalhe||'')+'"'}).join('\n');
+  dl('auditoria_pccs360_'+new Date().toISOString().split('T')[0]+'.csv',csv,'text/csv');
+  toast('Auditoria exportada!')
+}
+function _hookAudit(){
+  // Hook colabs
+  var _origSC=salvarColabDet;
+  salvarColabDet=function(){_origSC.apply(this,arguments);logAudit('Alteração','Colaboradores','Cadastro editado')};
+  var _origSCa=salvarColab;
+  salvarColab=function(){_origSCa.apply(this,arguments);logAudit('Inclusão','Colaboradores','Novo colaborador cadastrado')};
+  // Hook emps
+  var _origSE=salvarEmp;
+  salvarEmp=function(){_origSE.apply(this,arguments);logAudit('Projeto','Empresas','Projeto salvo/editado')};
+  // Hook fases
+  var _origSA=salvarAtv;
+  salvarAtv=function(){_origSA.apply(this,arguments);logAudit('Alteração','Fases','Atividade atualizada')};
+  // Hook toggle
+  var _origTA=toggleAtv;
+  toggleAtv=function(eid,fi,ai){_origTA(eid,fi,ai);logAudit('Status','Fases','Atividade marcada/desmarcada')}
+}
+function abrirGerarRelatorio(){
+  if(!empAtual){toast('Abra um projeto primeiro.',false);return}
+  document.getElementById('mrel-titulo').textContent='Relatório: '+empAtual.nome;
+  // Fill phase checkboxes
+  var fasesSel=document.getElementById('rel-fases-sel');
+  if(fasesSel){
+    fasesSel.innerHTML=(empAtual.fases||[]).map(function(f,fi){
+      var pp=calcFaseProg(f);
+      return'<label style="display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:var(--r2);cursor:pointer;font-size:.8rem">'+
+        '<input type="checkbox" class="rel-fase-cb" value="'+fi+'"'+(pp>0?' checked':'')+' style="cursor:pointer">'+
+        '<span>F'+(fi+1)+' — '+eh(f.n)+'</span>'+
+        '<span class="b '+(pp===100?'bg2':pp>0?'by':'bk')+'" style="font-size:.62rem">'+pp+'%</span>'+
+      '</label>'
+    }).join('')
+  }
+  openM('mgerador-rel')
+}
+function relUploadLogo(input,tipo){
+  if(!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    relatorioConfig[tipo]=e.target.result;
+    var prev=document.getElementById('prev-logo-'+tipo);
+    if(prev){prev.src=e.target.result;prev.style.display='block'}
+    toast('Logo carregada!')
+  };
+  reader.readAsDataURL(input.files[0])
+}
+function gerarRelatorio(){
+  if(!empAtual){toast('Nenhum projeto selecionado.',false);return}
+  var fasesCbs=document.querySelectorAll('.rel-fase-cb:checked');
+  var fasesSel=[...fasesCbs].map(function(cb){return parseInt(cb.value)});
+  if(!fasesSel.length){toast('Selecione ao menos uma fase.',false);return}
+  var tipoRel=document.getElementById('rel-tipo')&&document.getElementById('rel-tipo').value||'Diagnóstico';
+  var emp=empAtual;var hoje=new Date().toLocaleDateString('pt-BR');
+  var prog=calcProg(emp);
+  var colabs=emp.colabs||[];
+  var ic=detectIncons(emp);
+  // Build the report HTML
+  var w=window.open('','_blank');
+  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório PCCS — '+eh(emp.nome)+'</title>';
+  html+='<style>';
+  html+='*{box-sizing:border-box;margin:0;padding:0}';
+  html+='body{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;background:#fff;font-size:11pt;line-height:1.6}';
+  html+='.page{max-width:210mm;margin:0 auto;padding:0}';
+  html+='.header{background:#0d1b2e;color:#fff;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid #c9a84c}';
+  html+='.header-logos{display:flex;align-items:center;gap:1.5rem}';
+  html+='.header-logos img{height:50px;object-fit:contain;background:white;padding:4px;border-radius:4px}';
+  html+='.header-info{text-align:right}';
+  html+='.header-info h1{font-size:1.2rem;color:#c9a84c;margin-bottom:.2rem}';
+  html+='.header-info p{font-size:.8rem;color:#9ca3af}';
+  html+='.content{padding:2rem}';
+  html+='.section{margin-bottom:2rem}';
+  html+='.section-title{font-size:1.1rem;font-weight:700;color:#0d1b2e;border-bottom:2px solid #c9a84c;padding-bottom:.4rem;margin-bottom:1rem}';
+  html+='.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.5rem}';
+  html+='.kpi{background:#f8f9fa;border:1px solid #e5e7eb;border-radius:8px;padding:.8rem;text-align:center}';
+  html+='.kpi-n{font-size:1.8rem;font-weight:700;color:#0d1b2e}';
+  html+='.kpi-l{font-size:.72rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}';
+  html+='.kpi.gold .kpi-n{color:#c9a84c}';
+  html+='.kpi.green .kpi-n{color:#16a34a}';
+  html+='.kpi.red .kpi-n{color:#dc2626}';
+  html+='.progress-bar{height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden;margin:.3rem 0}';
+  html+='.progress-fill{height:100%;background:linear-gradient(90deg,#a8882e,#c9a84c);border-radius:6px}';
+  html+='table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.85rem}';
+  html+='th{background:#0d1b2e;color:#fff;padding:.5rem .7rem;text-align:left;font-size:.78rem}';
+  html+='td{padding:.4rem .7rem;border-bottom:1px solid #e5e7eb}';
+  html+='tr:nth-child(even) td{background:#f9fafb}';
+  html+='.badge{display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.72rem;font-weight:600}';
+  html+='.badge-ok{background:#dcfce7;color:#16a34a}';
+  html+='.badge-warn{background:#fef9c3;color:#854d0e}';
+  html+='.badge-err{background:#fee2e2;color:#dc2626}';
+  html+='.chart-bar{display:flex;align-items:center;gap:.5rem;margin:.35rem 0;font-size:.82rem}';
+  html+='.bar-label{width:180px;flex-shrink:0;font-size:.78rem;color:#374151}';
+  html+='.bar-track{flex:1;height:16px;background:#e5e7eb;border-radius:8px;overflow:hidden}';
+  html+='.bar-fill{height:100%;border-radius:8px}';
+  html+='.bar-pct{min-width:35px;text-align:right;font-weight:700;font-size:.78rem}';
+  html+='.footer{background:#f8f9fa;border-top:2px solid #e5e7eb;padding:1rem 2rem;text-align:center;font-size:.75rem;color:#9ca3af;margin-top:2rem}';
+  html+='.page-break{page-break-before:always}';
+  html+='@media print{.no-print{display:none}.page-break{page-break-before:always}}';
+  html+='</style></head><body><div class="page">';
+  // HEADER
+  html+='<div class="header">';
+  html+='<div class="header-logos">';
+  if(relatorioConfig.logoInst)html+='<img src="'+relatorioConfig.logoInst+'" alt="Instituto Primazia">';
+  else html+='<div style="height:50px;padding:8px 16px;background:rgba(201,168,76,.2);border-radius:4px;display:flex;align-items:center;color:#c9a84c;font-weight:700;font-size:.85rem">Instituto Primazia</div>';
+  if(relatorioConfig.logoEmp)html+='<img src="'+relatorioConfig.logoEmp+'" alt="'+eh(emp.nome)+'">';
+  html+='</div>';
+  html+='<div class="header-info"><h1>Relatório PCCS 360</h1><p>'+tipoRel+'</p><p>'+eh(emp.nome)+'</p><p>Gerado em: '+hoje+'</p></div>';
+  html+='</div>';
+  html+='<div class="content">';
+  // SUMMARY SECTION
+  html+='<div class="section">';
+  html+='<div class="section-title">1. Visão Executiva do Projeto</div>';
+  html+='<p style="margin-bottom:1rem;color:#374151">O presente relatório documenta o estágio atual do Plano de Cargos, Carreiras e Salários (PCCS) da empresa <strong>'+eh(emp.nome)+'</strong>';
+  if(emp.setor)html+=', do segmento <strong>'+eh(emp.setor)+'</strong>';
+  html+='. A consultoria é conduzida pelo <strong>Instituto Primazia</strong>';
+  if(emp.consul)html+=', sob responsabilidade da consultora <strong>'+eh(emp.consul)+'</strong>';
+  html+='. Período de implantação: '+(emp.ini?fd(emp.ini):'a definir')+' a '+(emp.fim?fd(emp.fim):'a definir')+'.</p>';
+  // KPIs
+  html+='<div class="kpi-grid">';
+  html+='<div class="kpi gold"><div class="kpi-n">'+prog+'%</div><div class="kpi-l">Progresso Geral</div></div>';
+  html+='<div class="kpi"><div class="kpi-n">'+colabs.length+'</div><div class="kpi-l">Colaboradores</div></div>';
+  html+='<div class="kpi '+(ic.length>0?'red':'green')+'"><div class="kpi-n">'+ic.length+'</div><div class="kpi-l">Inconsistências</div></div>';
+  var fasesConc=(emp.fases||[]).filter(function(f){return calcFaseProg(f)===100}).length;
+  html+='<div class="kpi green"><div class="kpi-n">'+fasesConc+'/7</div><div class="kpi-l">Fases Concluídas</div></div>';
+  html+='</div>';
+  // Progress bar
+  html+='<div style="margin-bottom:1rem"><div style="font-size:.82rem;font-weight:600;color:#374151;margin-bottom:.3rem">Progresso Geral do Projeto</div>';
+  html+='<div class="progress-bar"><div class="progress-fill" style="width:'+prog+'%"></div></div>';
+  html+='<div style="font-size:.75rem;color:#6b7280;text-align:right">'+prog+'% concluído</div></div>';
+  html+='</div>';
+  // FASES SECTION
+  html+='<div class="section">';
+  html+='<div class="section-title">2. Progresso por Fase PCCS</div>';
+  html+='<p style="margin-bottom:.8rem;color:#374151">Abaixo o detalhamento de cada fase da metodologia PCCS, com indicadores de conclusão e principais atividades realizadas.</p>';
+  (emp.fases||[]).forEach(function(f,fi){
+    if(fasesSel.indexOf(fi)<0)return;
+    var pp=calcFaseProg(f);
+    var dc=(f.atividades||[]).filter(function(a){return a.feito||a.st==='Concluido'}).length;
+    var tot=(f.atividades||[]).length;
+    html+='<div style="margin-bottom:1.2rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid '+(pp===100?'#16a34a':pp>0?'#c9a84c':'#e5e7eb')+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">'+
+        '<strong>F'+(fi+1)+' — '+eh(f.n)+'</strong>'+
+        '<span class="badge '+(pp===100?'badge-ok':pp>0?'badge-warn':'badge-err')+'">'+pp+'% ('+dc+'/'+tot+')</span>'+
+      '</div>'+
+      '<div class="progress-bar"><div class="progress-fill" style="width:'+pp+'%"></div></div>'+
+      '<p style="font-size:.82rem;color:#6b7280;margin-top:.4rem">'+eh(f.d||'')+'</p>';
+    // Activities table
+    if(tot>0){
+      html+='<table style="margin-top:.7rem"><tr><th>Atividade</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr>';
+      (f.atividades||[]).forEach(function(a){
+        var done=a.feito||a.st==='Concluido';
+        html+='<tr><td style="'+(done?'text-decoration:line-through;color:#9ca3af':'')+'">'+eh(a.n)+'</td>'+
+          '<td>'+eh(a.resp||'—')+'</td>'+
+          '<td>'+(a.prev?fd(a.prev):'—')+'</td>'+
+          '<td><span class="badge '+(done?'badge-ok':a.st==='Pendente'?'badge-err':'badge-warn')+'">'+eh(a.st||'Não iniciado')+'</span></td></tr>'
+      });
+      html+='</table>'
+    }
+    // Phase analysis text
+    var textos={
+      0:'O levantamento e diagnóstico é a base de todo o processo PCCS. Nesta fase, foram coletadas informações sobre a estrutura organizacional, quadro de colaboradores e remuneração vigente. As entrevistas com líderes permitiram compreender as expectativas e desafios da empresa.',
+      1:'O mapeamento de cargos é fundamental para garantir clareza nas funções e responsabilidades. As descrições elaboradas servirão como referência para avaliação, progressão e gestão de desempenho.',
+      2:'A avaliação e hierarquização de cargos define a estrutura de níveis e garante equidade interna. O método utilizado considera complexidade, responsabilidade e impacto de cada posição.',
+      3:'A pesquisa salarial fornece o referencial de mercado (P25, P50, P75) necessário para estruturar remunerações competitivas e sustentáveis, considerando o segmento e porte da empresa.',
+      4:'A estrutura salarial e as trilhas de carreira estabelecem os critérios objetivos de progressão, motivando os colaboradores e garantindo previsibilidade na gestão de pessoas.',
+      5:'A governança do PCCS assegura que as regras sejam aplicadas de forma consistente e transparente, com responsabilidades claras para aprovação e gestão do plano.',
+      6:'A implantação é a etapa de transformação do plano em realidade. A comunicação estruturada e o treinamento das lideranças são determinantes para o sucesso e sustentação do PCCS.'
+    };
+    html+='<p style="font-size:.82rem;color:#374151;margin-top:.6rem;padding-top:.6rem;border-top:1px solid #e5e7eb">'+( textos[fi]||'')+'</p>';
+    html+='</div>'
+  });
+  html+='</div>';
+  // COLABORADORES SECTION
+  if(colabs.length){
+    html+='<div class="section page-break">';
+    html+='<div class="section-title">3. Análise do Quadro de Colaboradores</div>';
+    html+='<p style="margin-bottom:1rem;color:#374151">O quadro de colaboradores da empresa é composto por <strong>'+colabs.length+' profissionais</strong>, distribuídos entre os departamentos conforme detalhado abaixo.</p>';
+    // Dept breakdown
+    var deptMap={};
+    colabs.forEach(function(c){var d=c.depto||'Não informado';deptMap[d]=(deptMap[d]||0)+1});
+    var depts=Object.entries(deptMap).sort(function(a,b){return b[1]-a[1]});
+    html+='<div class="section-title" style="font-size:.9rem;margin-bottom:.5rem">Distribuição por Departamento</div>';
+    depts.forEach(function(d){
+      var pct=Math.round(d[1]/colabs.length*100);
+      html+='<div class="chart-bar"><div class="bar-label">'+eh(d[0])+'</div>'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#a8882e,#c9a84c)"></div></div>'+
+        '<div class="bar-pct">'+d[1]+' ('+pct+'%)</div></div>'
+    });
+    // Salary stats
+    var sals=colabs.map(function(c){return parseFloat(c.sal)||0}).filter(function(v){return v>0});
+    if(sals.length){
+      var avg=Math.round(sals.reduce(function(a,b){return a+b},0)/sals.length);
+      var minS=Math.min.apply(null,sals);var maxS=Math.max.apply(null,sals);
+      html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0">';
+      html+='<div class="kpi"><div class="kpi-n" style="font-size:1.3rem">R$ '+avg.toLocaleString('pt-BR')+'</div><div class="kpi-l">Salário Médio</div></div>';
+      html+='<div class="kpi"><div class="kpi-n" style="font-size:1.3rem">R$ '+minS.toLocaleString('pt-BR')+'</div><div class="kpi-l">Menor Salário</div></div>';
+      html+='<div class="kpi gold"><div class="kpi-n" style="font-size:1.3rem">R$ '+maxS.toLocaleString('pt-BR')+'</div><div class="kpi-l">Maior Salário</div></div>';
+      html+='</div>'
+    }
+    html+='</div>'
+  }
+  // INCONSISTENCIAS
+  if(ic.length){
+    html+='<div class="section">';
+    html+='<div class="section-title">4. Inconsistências Identificadas</div>';
+    html+='<p style="margin-bottom:.8rem;color:#374151">Foram identificadas <strong style="color:#dc2626">'+ic.length+' inconsistências</strong> no cadastro de colaboradores que requerem atenção para a construção de um PCCS sólido.</p>';
+    html+='<table><tr><th>Colaborador</th><th>Tipo</th><th>Risco</th><th>Recomendação</th></tr>';
+    ic.slice(0,30).forEach(function(i){
+      html+='<tr><td>'+eh(i.n)+'</td><td>'+eh(i.tipo)+'</td>'+
+        '<td><span class="badge '+(i.nivel==='Alto'?'badge-err':i.nivel==='Medio'?'badge-warn':'badge-ok')+'">'+i.nivel+'</span></td>'+
+        '<td style="font-size:.78rem;color:#6b7280">'+eh(i.sug)+'</td></tr>'
+    });
+    html+='</table>';
+    if(ic.length>30)html+='<p style="font-size:.78rem;color:#6b7280;margin-top:.4rem">+ '+(ic.length-30)+' inconsistências adicionais. Ver relatório completo no sistema.</p>';
+    html+='</div>'
+  }
+  // FOOTER
+  html+='</div>'; // content
+  html+='<div class="footer">'+
+    '<p><strong>Instituto Primazia</strong> — Gestão Inteligente de Pessoas</p>'+
+    '<p>PCCS 360 · Relatório gerado em '+hoje+' · Confidencial</p>'+
+  '</div>';
+  html+='</div></body></html>';
+  w.document.write(html);w.document.close();
+  setTimeout(function(){w.print()},800);
+  closeM('mgerador-rel');
+  logAudit('Geração','Relatório','Relatório '+tipoRel+' gerado para '+emp.nome);
+  toast('Relatório gerado!')
 }
 </script>
 </body>
