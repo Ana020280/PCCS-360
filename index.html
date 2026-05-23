@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PCCS 360 · Instituto Primazia</title>
+<title>PCCS 360 v4.0 · Instituto Primazia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -861,6 +861,7 @@ input[type="date"].inp{color-scheme:dark}
 
 
 
+
 // PCCS 360 v3.1 — JavaScript Enhanced
 // Changelog, projeto por status, colaborador detalhe, fases melhoradas, tp9
 
@@ -944,7 +945,7 @@ function nav(vid){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});
   var el=document.getElementById(vid);if(el)el.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.toggle('on',n.dataset.v===vid)});
-  var renders={vdash:renderDash,vanal:renderDash,vaudit:renderAudit,vanal:renderAnal,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
+  var renders={vdash:renderDash,vanal:renderDash,vaudit:renderAudit,vemp:renderEmps,vusers:renderUsers,vcargos:renderCargos,vpes:renderPes,vest:renderEst,vgov:renderGov,vlog:renderChangelog};
   if(renders[vid])renders[vid]();
   window.scrollTo(0,0)
 }
@@ -981,18 +982,47 @@ function delLog(id){if(!confirm('Excluir registro?'))return;sst('changelog',(gst
 // ═══ EMPRESA CRUD ═══
 var empEditId=null;
 function salvarEmp(){
-  var n=gv('emp-nome');if(!n){toast('Nome obrigatório.',false);return}
-  var emps=gst('emps')||[];
-  var fases=FP.map(function(f){return{n:f.n,d:f.d,status:'Não iniciado',atividades:f.a.map(function(a){return{n:a,feito:false,resp:'',consul:'',ini:'',prev:'',conc:'',st:'Não iniciado',pct:0,obs:'',prior:'Normal',anexos:[]}}),anexos:[]}});
-  if(empEditId){
-    var idx=emps.findIndex(function(e){return e.id===empEditId});
-    if(idx>=0){var em=emps[idx];em.nome=cap(n);em.setor=gv('emp-setor');em.lider=gv('emp-lider');em.resp=gv('emp-resp');em.ini=gv('emp-ini');em.fim=gv('emp-fim');em.st=gv('emp-st');em.consul=gv('emp-consul')}
-  } else {
-    emps.push({id:'e'+Date.now(),nome:cap(n),setor:gv('emp-setor'),lider:gv('emp-lider'),resp:gv('emp-resp'),ini:gv('emp-ini'),fim:gv('emp-fim'),consul:gv('emp-consul'),st:gv('emp-st'),fases:fases,colabs:[],deptos:[],obs:'',anexos:[]})
+  try{
+    var n=gv('emp-nome');if(!n){toast('Nome obrigatório.',false);return}
+    var emps=gst('emps')||[];
+    var fases=FP.map(function(f){
+      return{n:f.n,d:f.d,status:'Nao iniciado',
+        atividades:(f.a||[]).map(function(a){
+          var nm=typeof a==='object'?(a.t||a.n||''):String(a);
+          return{n:nm,feito:false,resp:'',prev:'',conc:'',st:'Nao iniciado',pct:0,obs:'',link:'',anexos:[]}
+        }),anexos:[]}
+    });
+    if(empEditId){
+      var idx=emps.findIndex(function(e){return e.id===empEditId});
+      if(idx>=0){
+        var em=emps[idx];
+        em.nome=cap(n);em.setor=gv('emp-setor');em.lider=gv('emp-lider');
+        em.resp=gv('emp-resp');em.ini=gv('emp-ini');em.fim=gv('emp-fim');
+        em.st=gv('emp-st');em.consul=gv('emp-consul');
+      }
+    }else{
+      emps.push({
+        id:'e'+Date.now(),nome:cap(n),setor:gv('emp-setor'),lider:gv('emp-lider'),
+        resp:gv('emp-resp'),ini:gv('emp-ini'),fim:gv('emp-fim'),consul:gv('emp-consul'),
+        st:gv('emp-st')||'Em andamento',fases:fases,fases2:{},
+        colabs:[],deptos:[],obs:'',anexos:[]
+      })
+    }
+    sst('emps',emps);
+    empEditId=null;
+    closeM('memp');limpaEmpForm();
+    toast('Projeto salvo! ✓');
+    logAudit('Criacao','Projetos','Projeto '+cap(n)+' salvo');
+    // Force re-render whichever view is active
+    if(document.getElementById('vdash')&&document.getElementById('vdash').classList.contains('on'))renderDash();
+    if(document.getElementById('vemp')&&document.getElementById('vemp').classList.contains('on'))renderEmps();
+    // If neither is active, navigate to vemp to show the new project
+    var neitherActive=!document.getElementById('vdash').classList.contains('on')&&!document.getElementById('vemp').classList.contains('on');
+    if(neitherActive){nav('vemp')}
+  }catch(err){
+    console.error('salvarEmp error:',err);
+    toast('Erro ao salvar: '+err.message,false)
   }
-  sst('emps',emps);closeM('memp');limpaEmpForm();toast('Projeto salvo!');
-  if(document.getElementById('vdash').classList.contains('on'))renderDash();
-  if(document.getElementById('vemp').classList.contains('on'))renderEmps()
 }
 function limpaEmpForm(){['emp-id','emp-nome','emp-setor','emp-lider','emp-resp','emp-ini','emp-fim'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});empEditId=null}
 function editEmp(id){var em=(gst('emps')||[]).find(function(e){return e.id===id});if(!em)return;empEditId=id;document.getElementById('emp-nome').value=em.nome||'';document.getElementById('emp-setor').value=em.setor||'';document.getElementById('emp-lider').value=em.lider||'';document.getElementById('emp-resp').value=em.resp||'';document.getElementById('emp-ini').value=em.ini||'';document.getElementById('emp-fim').value=em.fim||'';document.getElementById('emp-st').value=em.st||'Não iniciado';openM('memp');setTimeout(function(){var s=document.getElementById('emp-consul');if(s)s.value=em.consul||''},100)}
@@ -2274,6 +2304,7 @@ function calcProg(emp){
   return tot>0?Math.round(done/tot*100):0
 }
 var blocoAnexosPending=[];
+
 
 
 </script>
