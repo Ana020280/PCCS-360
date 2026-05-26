@@ -315,7 +315,7 @@ input[type="date"].inp{color-scheme:dark}
       <div class="sb-sec">
         <div class="sb-lbl">PRINCIPAL</div>
         <button class="ni on" data-v="vdash" onclick="nav('vdash')"><span class="ni-ico">◈</span>Dashboard Geral</button>
-        <button class="ni" data-v="vanal" onclick="nav('vanal')"><span class="ni-ico">◉</span>Dashboard Analítico</button>
+        
         <button class="ni" data-v="vemp" onclick="nav('vemp')"><span class="ni-ico">◐</span>Empresas / Projetos</button>
       </div>
       <div class="sb-sec">
@@ -329,7 +329,7 @@ input[type="date"].inp{color-scheme:dark}
         <div class="sb-lbl">GESTÃO</div>
         <button class="ni" data-v="vrel" onclick="nav('vrel')"><span class="ni-ico">◕</span>Relatórios</button>
         <button class="ni" data-v="vconf" onclick="nav('vconf')"><span class="ni-ico">◗</span>Configurações</button>
-        <button class="ni" data-v="vlog" onclick="nav('vlog')"><span class="ni-ico">◆</span>Registro de Alterações</button>
+        <button class="ni" data-v="vlog" onclick="nav('vlog')"><span class="ni-ico">◆</span>Auditoria</button>
       </div>
       <div class="sb-sec">
         <div class="sb-lbl">ADMINISTRAÇÃO</div>
@@ -405,10 +405,10 @@ input[type="date"].inp{color-scheme:dark}
     <div class="srow" id="det-stats"></div>
     <div class="tabs" id="projeto-tabs">
       <button class="tab on" onclick="tabP('tp0',this)">◈ Visão Geral</button>
+      <button class="tab" onclick="tabP('tp3',this)">◐ Produtividade</button>
       <button class="tab" onclick="tabP('tp1',this)">◉ Fases do PCCS</button>
-      <button class="tab" onclick="tabP('tp2',this)">◎ Kanban</button>
-      <button class="tab" onclick="tabP('tp3',this)">◐ Performance</button>
-      <button class="tab" onclick="tabP('tp4',this)">◑ Colaboradores</button>
+      
+            <button class="tab" onclick="tabP('tp4',this)">◑ Dados Folha</button>
       <button class="tab" onclick="tabP('tp5',this)">◒ Departamentos</button>
       <button class="tab" onclick="tabP('tp6',this)">◓ Inconsistências</button>
       <button class="tab" onclick="tabP('tp7',this)">◔ IA Organizacional</button>
@@ -547,7 +547,7 @@ input[type="date"].inp{color-scheme:dark}
 
 <!-- REGISTRO DE ALTERAÇÕES -->
 <div class="view" id="vlog">
-  <div class="phdr"><div><h2>Registro de <em>Alterações</em></h2><p>Histórico de mudanças e melhorias do sistema</p></div><div class="phdr-r"><button class="btn bg" onclick="openM('mlog')">+ Registrar Alteração</button></div></div>
+  <div class="phdr"><div><h2><em>Auditoria</em> do Sistema</h2><p>Histórico de mudanças e melhorias do sistema</p></div><div class="phdr-r"><button class="btn bg" onclick="openM('mlog')">+ Registrar Alteração</button></div></div>
   <div class="content">
     <div class="tw"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Responsável</th><th>Status</th><th></th></tr></thead><tbody id="log-tbody"></tbody></table></div>
   </div>
@@ -1050,8 +1050,8 @@ function renderVG(emp){
       '<div><div class="card" style="margin-bottom:.8rem"><div class="sec-t">◎ Resumo Kanban</div>'+kbSummary+'<button class="btn bh bs" style="margin-top:.7rem;width:100%" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[2].click()">Ver Kanban Completo →</button></div>'+
       '<div class="card"><div class="sec-t">◐ Ações Rápidas</div><div style="display:flex;flex-direction:column;gap:.4rem">'+
         '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[1].click()" style="justify-content:flex-start">◉ Ver Fases do PCCS</button>'+
-        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[3].click()" style="justify-content:flex-start">◐ Performance da Equipe</button>'+
-        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[4].click()" style="justify-content:flex-start">◑ Colaboradores ('+( emp.colabs||[]).length+')</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[3].click()" style="justify-content:flex-start">◐ Produtividade da Equipe</button>'+
+        '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[4].click()" style="justify-content:flex-start">◑ Dados Folha ('+( emp.colabs||[]).length+')</button>'+
         '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[6].click()" style="justify-content:flex-start">◓ Inconsistências ('+ic.length+')</button>'+
         '<button class="btn bh bs" onclick="document.querySelectorAll(\'#projeto-tabs .tab\')[7].click()" style="justify-content:flex-start">◔ IA Organizacional</button>'+
       '</div></div></div>'+
